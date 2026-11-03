@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MySqlConnector;
-
-namespace ClinicaCentral
+    namespace ClinicaCentral
 {
     public class StaffRow
     {
