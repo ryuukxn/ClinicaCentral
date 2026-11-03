@@ -193,8 +193,6 @@
                 </TextBlock>
 
                 <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,24">
-                    <Button Content="Call Center" Tag="&#xE717;" Style="{StaticResource NavButton}"/>
-                    <Button Content="Help"        Tag="&#xE897;" Style="{StaticResource NavButton}"/>
                     <Button Content="Log Out"     Tag="&#xE7E8;" Style="{StaticResource NavButton}"/>
                 </StackPanel>
 
@@ -203,7 +201,6 @@
                     <Button Content="Patient Records" Tag="&#xE77B;" Style="{StaticResource NavButton}"/>
                     <Button Content="Schedule"        Tag="&#xE787;" Style="{StaticResource NavButton}"/>
                     <Button Content="Receipts"        Tag="&#xE7C3;" Style="{StaticResource NavButton}"/>
-                    <Button Content="Settings"        Tag="&#xE713;" Style="{StaticResource NavButton}"/>
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -216,17 +213,25 @@
 
             <Border Grid.Row="0">
                 <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                        <GradientStop Color="#2F5FA8" Offset="0"/>
-                        <GradientStop Color="#5B8FE0" Offset="1"/>
-                    </LinearGradientBrush>
+                    <ImageBrush ImageSource="Clinica_bg.png" Stretch="UniformToFill"
+                                AlignmentX="Center" AlignmentY="Center"/>
                 </Border.Background>
-                <StackPanel Margin="32,0,0,0" VerticalAlignment="Center">
+                <Grid>
+                    <Rectangle>
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#B02F5FA8" Offset="0"/>
+                                <GradientStop Color="#702F5FA8" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <StackPanel Margin="32,0,0,0" VerticalAlignment="Center">
                     <TextBlock x:Name="lblWelcome" Text="Welcome back, Staff!" FontSize="28"
                                FontWeight="ExtraBold" Foreground="White"/>
                     <TextBlock Text="Overview of your Activities for Today" FontSize="12"
                                FontWeight="Bold" Foreground="White"/>
                 </StackPanel>
+                </Grid>
             </Border>
 
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">

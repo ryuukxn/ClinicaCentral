@@ -111,8 +111,6 @@
                 </TextBlock>
 
                 <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,24">
-                    <Button Content="Call Center" Tag="&#xE717;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
-                    <Button Content="Help"        Tag="&#xE897;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
                     <Button Content="Log Out"     Tag="&#xE7E8;" Style="{StaticResource NavButton}" Click="LogOut_Click"/>
                 </StackPanel>
 
@@ -123,8 +121,6 @@
                     <Button Content="Appointments"     Tag="&#xE787;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
                     <Button Content="Receipts"         Tag="&#xE7C3;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
                     <Button Content="Staff Account"    Tag="&#xE7EF;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
-                    <Button Content="Settings"         Tag="&#xE713;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
-                    <Button Content="Backup &amp; Recovery" Tag="&#xE777;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -136,15 +132,20 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Welcome banner (swap the gradient for an ImageBrush if you add a photo) -->
             <Border Grid.Row="0">
                 <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                        <GradientStop Color="#2F5FA8" Offset="0"/>
-                        <GradientStop Color="#5B8FE0" Offset="1"/>
-                    </LinearGradientBrush>
+                    <ImageBrush ImageSource="Clinica_bg.png" Stretch="UniformToFill"
+                                AlignmentX="Center" AlignmentY="Center"/>
                 </Border.Background>
                 <Grid>
+                    <Rectangle>
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#B02F5FA8" Offset="0"/>
+                                <GradientStop Color="#702F5FA8" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
                     <StackPanel Margin="32,0,0,0" VerticalAlignment="Center">
                         <TextBlock x:Name="lblWelcome" Text="Welcome back!" FontSize="30"
                                    FontWeight="ExtraBold" Foreground="White"/>

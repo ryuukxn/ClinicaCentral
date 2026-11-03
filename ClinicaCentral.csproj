@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Resource Include="ClinicaCentral_Logo.png" />
+    <Resource Include="Clinica_bg.png" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
     <PackageReference Include="MySqlConnector" Version="2.6.2" />
   </ItemGroup>
