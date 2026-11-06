@@ -1,9 +1,10 @@
-﻿   <Application x:Class="ClinicaCentral.App"
-                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                xmlns:local="clr-namespace:ClinicaCentral"
-                StartupUri="LoginWindow.xaml">
-       <Application.Resources>
+﻿<Application x:Class="ClinicaCentral.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:ClinicaCentral"
+             StartupUri="login_form.xaml">
 
-       </Application.Resources>
-   </Application>
+    <Application.Resources>
+    </Application.Resources>
+
+</Application>
