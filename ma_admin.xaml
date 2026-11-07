@@ -1,0 +1,488 @@
+<Window x:Class="ClinicaCentral.ma_admin"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ClinicaCentral - Manage Account"
+        Width="1280" Height="800" MinWidth="1050" MinHeight="680"
+        WindowStartupLocation="CenterScreen"
+        Background="#E6E6E6"
+        FontFamily="Segoe UI">
+
+    <Window.Resources>
+        <Style x:Key="NavButton" TargetType="Button">
+            <Setter Property="Foreground" Value="#9A9A9A"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" Padding="26,0,10,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{TemplateBinding Tag}" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="18" Width="34" VerticalAlignment="Center"/>
+                                <ContentPresenter VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#333333"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="NavButtonActive" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#00AEEF"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" Padding="26,0,10,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{TemplateBinding Tag}" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="18" Width="34" VerticalAlignment="Center"/>
+                                <ContentPresenter VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#3B8EDB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="24"/>
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#3A6BC4"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                CornerRadius="6" Padding="20,9">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#2F58A3"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryButton" TargetType="Button">
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="White" BorderBrush="#999999"
+                                BorderThickness="1" CornerRadius="6" Padding="20,8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#F0F0F0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FilterPill" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#8A8A8A"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="14" Padding="16,5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FilterPillActive" TargetType="Button" BasedOn="{StaticResource FilterPill}">
+            <Setter Property="Background" Value="#00AEEF"/>
+        </Style>
+
+        <Style x:Key="RowEditButton" TargetType="Button">
+            <Setter Property="Foreground" Value="#222222"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Width" Value="52"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="White" BorderBrush="#777777"
+                                BorderThickness="1" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#F0F0F0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RowToggleButton" TargetType="Button">
+            <Setter Property="Content" Value="Deactivate"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#C0392B"/>
+            <Setter Property="Foreground" Value="#C0392B"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Width" Value="92"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Status}" Value="Inactive">
+                    <Setter Property="Content" Value="Activate"/>
+                    <Setter Property="Background" Value="#1F4FD8"/>
+                    <Setter Property="BorderBrush" Value="#1F4FD8"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#6B7A90"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+
+        <Style x:Key="FieldBox" TargetType="TextBox">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="White" BorderBrush="#3B6FD0" BorderThickness="1.5"
+                                CornerRadius="6" Padding="10,0">
+                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FieldPassword" TargetType="PasswordBox">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="PasswordBox">
+                        <Border Background="White" BorderBrush="#3B6FD0" BorderThickness="1.5"
+                                CornerRadius="6" Padding="10,0">
+                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SearchBoxStyle" TargetType="TextBox">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="White" BorderBrush="#3B6FD0" BorderThickness="1.5"
+                                CornerRadius="6" Padding="12,0">
+                            <Grid>
+                                <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="hint" Text="Search by Name" Foreground="#9A9A9A"
+                                           VerticalAlignment="Center" IsHitTestVisible="False"
+                                           Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="hint" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ColumnHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#7C8BA1"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Background="#262626">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Margin="26,44,0,40" FontSize="26">
+                    <Run Text="Clinica" Foreground="White"/><Run Text="Central" Foreground="#00AEEF"/>
+                </TextBlock>
+
+                <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,24">
+                    <Button Content="Log Out" Tag="&#xE7E8;" Style="{StaticResource NavButton}" Click="LogOut_Click"/>
+                </StackPanel>
+
+                <StackPanel>
+                    <Button Content="Dashboard"      Tag="&#xE80F;" Style="{StaticResource NavButton}" Click="Dashboard_Click"/>
+                    <Button Content="Manage Account" Tag="&#xE77B;" Style="{StaticResource NavButtonActive}"/>
+                    <Button Content="Appointments"   Tag="&#xE787;" Style="{StaticResource NavButton}" Click="Appointments_Click"/>
+                    <Button Content="Receipts"       Tag="&#xE7C3;" Style="{StaticResource NavButton}" Click="Receipts_Click"/>
+                    <Button Content="Backup"         Tag="&#xE895;" Style="{StaticResource NavButton}" Click="NavigationPlaceholder_Click"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="120"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0">
+                <Border.Background>
+                    <ImageBrush ImageSource="Clinica_bg.png" Stretch="UniformToFill"
+                                AlignmentX="Center" AlignmentY="Center"/>
+                </Border.Background>
+                <Grid>
+                    <Rectangle>
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#B02F5FA8" Offset="0"/>
+                                <GradientStop Color="#702F5FA8" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <StackPanel Margin="32,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="Welcome back, Admin!" FontSize="30"
+                                   FontWeight="ExtraBold" Foreground="White"/>
+                        <TextBlock Text="Overview of your Activities for Today" FontSize="12"
+                                   FontWeight="Bold" Foreground="White"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="1" Margin="30,28,30,28" Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <TextBlock Text="MANAGE ACCOUNT" FontSize="26" FontWeight="ExtraBold"
+                                   VerticalAlignment="Center"/>
+                        <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right"
+                                Click="AddAccount_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                                           Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Add Account" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <Border x:Name="AddAccountPanel" Grid.Row="1" Visibility="Collapsed"
+                            Background="#EDEDED" CornerRadius="6" Padding="16" Margin="0,16,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="1.2*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="1.6*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Full name" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="NameBox" Grid.Row="1" Grid.Column="0" Style="{StaticResource FieldBox}"/>
+
+                            <TextBlock Grid.Row="0" Grid.Column="2" Text="Role" Style="{StaticResource FieldLabel}"/>
+                            <ComboBox x:Name="RoleBox" Grid.Row="1" Grid.Column="2" Height="38" FontSize="14"
+                                      VerticalContentAlignment="Center" SelectedIndex="0">
+                                <ComboBoxItem Content="Doctor"/>
+                                <ComboBoxItem Content="Patient"/>
+                            </ComboBox>
+
+                            <TextBlock Grid.Row="0" Grid.Column="4" Text="Email" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="EmailBox" Grid.Row="1" Grid.Column="4" Style="{StaticResource FieldBox}"/>
+
+                            <TextBlock Grid.Row="0" Grid.Column="6" Text="Password" Style="{StaticResource FieldLabel}"/>
+                            <PasswordBox x:Name="PasswordBox" Grid.Row="1" Grid.Column="6"
+                                         Style="{StaticResource FieldPassword}"/>
+
+                            <StackPanel Grid.Row="2" Grid.ColumnSpan="7" Orientation="Horizontal"
+                                        HorizontalAlignment="Right" Margin="0,14,0,0">
+                                <Button Content="Cancel" Style="{StaticResource SecondaryButton}"
+                                        Margin="0,0,10,0" Click="CancelAdd_Click"/>
+                                <Button Content="Save Account" Style="{StaticResource PrimaryButton}"
+                                        FontSize="14" Click="SaveAccount_Click"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Grid Grid.Row="2" Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="280"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button x:Name="AllFilter" Content="All 0" Style="{StaticResource FilterPillActive}"
+                                    Click="Filter_Click"/>
+                            <Button x:Name="DoctorFilter" Content="Doctor 0" Style="{StaticResource FilterPill}"
+                                    Click="Filter_Click"/>
+                            <Button x:Name="PatientFilter" Content="Patient 0" Style="{StaticResource FilterPill}"
+                                    Click="Filter_Click"/>
+                        </StackPanel>
+
+                        <TextBox x:Name="SearchBox" Grid.Column="1" Style="{StaticResource SearchBoxStyle}"
+                                 TextChanged="SearchBox_TextChanged"/>
+                    </Grid>
+
+                    <Grid Grid.Row="3" Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2.2*"/>
+                            <ColumnDefinition Width="1.2*"/>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="1.3*"/>
+                            <ColumnDefinition Width="2.6*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Name" Style="{StaticResource ColumnHeader}"/>
+                        <TextBlock Grid.Column="1" Text="Role" Style="{StaticResource ColumnHeader}"/>
+                        <TextBlock Grid.Column="2" Text="Email" Style="{StaticResource ColumnHeader}"/>
+                        <TextBlock Grid.Column="3" Text="Status" Style="{StaticResource ColumnHeader}"/>
+                        <TextBlock Grid.Column="4" Text="Action" Style="{StaticResource ColumnHeader}"/>
+                    </Grid>
+
+                    <Border Grid.Row="4" BorderBrush="#E3E3E3" BorderThickness="0,1,0,0" Margin="0,8,0,0">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="AccountList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#EEEEEE" BorderThickness="0,0,0,1" Padding="0,12">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="2.2*"/>
+                                                    <ColumnDefinition Width="1.2*"/>
+                                                    <ColumnDefinition Width="3*"/>
+                                                    <ColumnDefinition Width="1.3*"/>
+                                                    <ColumnDefinition Width="2.6*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="15"
+                                                           FontWeight="Bold" VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis" Margin="0,0,8,0"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Role}" FontSize="15"
+                                                           Foreground="#555555" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding Email}" FontSize="15"
+                                                           Foreground="#555555" VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis" Margin="0,0,8,0"/>
+
+                                                <Border Grid.Column="3" CornerRadius="11" Padding="12,3"
+                                                        HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="#DFF5E6"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Status}" Value="Inactive">
+                                                                    <Setter Property="Background" Value="#FBE0E0"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Text="{Binding Status}" FontSize="12" FontWeight="Bold">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="#1E8E4E"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Status}" Value="Inactive">
+                                                                        <Setter Property="Foreground" Value="#C0392B"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Border>
+
+                                                <StackPanel Grid.Column="4" Orientation="Horizontal"
+                                                            VerticalAlignment="Center">
+                                                    <Button Content="Edit" Tag="{Binding}"
+                                                            Style="{StaticResource RowEditButton}"
+                                                            Click="Edit_Click"/>
+                                                    <Button Tag="{Binding}"
+                                                            Style="{StaticResource RowToggleButton}"
+                                                            Click="ToggleStatus_Click"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
