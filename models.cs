@@ -55,15 +55,9 @@ namespace ClinicaCentral
     {
         public AdminUser(string username) : base(username) { }
 
-        public override string Role
-        {
-            get { return "Admin"; }
-        }
+        public override string Role => "Admin";
 
-        public override bool CanManageStaff()
-        {
-            return true;
-        }
+        public override bool CanManageStaff() => true;
 
         public override string GetWelcomeMessage()
         {
@@ -75,14 +69,17 @@ namespace ClinicaCentral
     {
         public StaffUser(string username) : base(username) { }
 
-        public override string Role
-        {
-            get { return "Staff"; }
-        }
+        public override string Role => "Staff";
 
-        public override bool CanManageStaff()
-        {
-            return false;
-        }
+        public override bool CanManageStaff() => false;
+    }
+
+    public sealed class UserAccountRow
+    {
+        public int Id { get; init; }
+        public string Name { get; init; } = "";
+        public string Role { get; init; } = "";
+        public string Email { get; init; } = "";
+        public string Status { get; init; } = "Active";
     }
 }
