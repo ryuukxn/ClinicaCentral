@@ -8,7 +8,6 @@
         FontFamily="Segoe UI">
 
     <Window.Resources>
-        <!-- Sidebar button (inactive) -->
         <Style x:Key="NavButton" TargetType="Button">
             <Setter Property="Foreground" Value="#9A9A9A"/>
             <Setter Property="Background" Value="Transparent"/>
@@ -36,7 +35,6 @@
             </Setter>
         </Style>
 
-        <!-- Sidebar button (current page) -->
         <Style x:Key="NavButtonActive" TargetType="Button">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Background" Value="#00AEEF"/>
@@ -58,7 +56,6 @@
             </Setter>
         </Style>
 
-        <!-- White pill button -->
         <Style x:Key="PillButton" TargetType="Button">
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="FontWeight" Value="Bold"/>
@@ -81,7 +78,6 @@
             </Setter>
         </Style>
 
-        <!-- White card with blue outline -->
         <Style x:Key="Card" TargetType="Border">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#3B8EDB"/>
@@ -103,7 +99,6 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- ================= SIDEBAR ================= -->
         <Border Grid.Column="0" Background="#262626">
             <DockPanel>
                 <TextBlock DockPanel.Dock="Top" Margin="26,44,0,40" FontSize="26">
@@ -115,17 +110,15 @@
                 </StackPanel>
 
                 <StackPanel>
-                    <Button Content="Dashboard"        Tag="&#xE80F;" Style="{StaticResource NavButtonActive}"/>
-                    <Button Content="Patient"          Tag="&#xE77B;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
-                    <Button Content="Staff"            Tag="&#xE716;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
-                    <Button Content="Appointments"     Tag="&#xE787;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
-                    <Button Content="Receipts"         Tag="&#xE7C3;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
-                    <Button Content="Staff Account"    Tag="&#xE7EF;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
+                    <Button Content="Dashboard"      Tag="&#xE80F;" Style="{StaticResource NavButtonActive}"/>
+                    <Button Content="Manage Account" Tag="&#xE77B;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
+                    <Button Content="Appointments"   Tag="&#xE787;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
+                    <Button Content="Receipts"       Tag="&#xE7C3;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
+                    <Button Content="Backup"         Tag="&#xE895;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
                 </StackPanel>
             </DockPanel>
         </Border>
 
-        <!-- ================= MAIN AREA ================= -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="120"/>
@@ -164,7 +157,6 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- Stat cards -->
                 <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -197,7 +189,6 @@
                     </Border>
                 </Grid>
 
-                <!-- Chart + staff status -->
                 <Grid Grid.Row="1" Margin="0,24,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1.7*"/>

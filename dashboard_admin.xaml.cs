@@ -120,6 +120,28 @@ namespace ClinicaCentral
         private void Nav_Click(object sender, RoutedEventArgs e)
         {
             string page = (sender as Button)?.Content?.ToString() ?? "This";
+
+            if (page == "Manage Account")
+            {
+                new ma_admin(_user).Show();
+                Close();
+                return;
+            }
+
+            if (page == "Appointments")
+            {
+                new appointment_admin(_user).Show();
+                Close();
+                return;
+            }
+
+            if (page == "Receipts")
+            {
+                new receipt_admin(_user).Show();
+                Close();
+                return;
+            }
+
             MessageBox.Show($"The {page} page is coming next.", "ClinicaCentral");
         }
 
