@@ -50,8 +50,6 @@ namespace ClinicaCentral
             var list = new List<ReceiptRecord>();
 
             using var conn = OpenConnection();
-            EnsureTable(conn);
-
             using var cmd = new MySqlCommand(
                 "SELECT r.id, r.receipt_date, CONCAT(p.first_name, ' ', p.last_name), " +
                 "r.doctor, r.purpose, r.status, r.issued_by " +
@@ -72,32 +70,6 @@ namespace ClinicaCentral
                 list.Add(item);
             }
             return list;
-        }
-
-        public void MarkPrinted(int id)
-        {
-            using var conn = OpenConnection();
-            using var cmd = new MySqlCommand(
-                "UPDATE receipts SET status = 'Printed' WHERE id = @id", conn);
-            cmd.Parameters.AddWithValue("@id", id);
-
-            if (cmd.ExecuteNonQuery() == 0)
-                throw new InvalidOperationException("The receipt was not found.");
-        }
-
-        private void EnsureTable(MySqlConnection conn)
-        {
-            using var cmd = new MySqlCommand(
-                "CREATE TABLE IF NOT EXISTS receipts (" +
-                "id INT AUTO_INCREMENT PRIMARY KEY, " +
-                "patient_id INT NOT NULL, " +
-                "appointment_id INT NULL, " +
-                "doctor VARCHAR(100) NULL, " +
-                "purpose VARCHAR(100) NOT NULL DEFAULT 'Consultation', " +
-                "status VARCHAR(20) NOT NULL DEFAULT 'Issued', " +
-                "issued_by VARCHAR(50) NOT NULL DEFAULT 'Admin', " +
-                "receipt_date DATE NOT NULL)", conn);
-            cmd.ExecuteNonQuery();
         }
     }
 }
