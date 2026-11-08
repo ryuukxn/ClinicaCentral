@@ -1,0 +1,199 @@
+<Window x:Class="ClinicaCentral.mr_view"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Medical Record"
+        Width="680" SizeToContent="Height" MaxHeight="820"
+        ResizeMode="NoResize" WindowStartupLocation="CenterOwner"
+        Background="White" FontFamily="Segoe UI">
+
+    <Window.Resources>
+        <FontFamily x:Key="TitleFont">Poppins, Segoe UI Black</FontFamily>
+
+        <Style x:Key="SectionLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="#777"/>
+            <Setter Property="Margin" Value="0,14,0,4"/>
+        </Style>
+
+        <Style x:Key="VitalCard" TargetType="Border">
+            <Setter Property="BorderBrush" Value="#BDBDBD"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8,4,8,8"/>
+            <Setter Property="Margin" Value="3,0"/>
+            <Setter Property="Background" Value="#FAFAFA"/>
+        </Style>
+
+        <Style x:Key="VitalLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="#444"/>
+        </Style>
+
+        <Style x:Key="VitalValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="19"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,2,0,0"/>
+        </Style>
+
+        <Style x:Key="FileBox" TargetType="Border">
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="Height" Value="110"/>
+            <Setter Property="Background" Value="#EDEDED"/>
+            <Setter Property="BorderBrush" Value="#222"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+
+        <Style x:Key="BlueButton" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="#3B6FCB" BorderBrush="#2F5FA8" BorderThickness="1"
+                                CornerRadius="5" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#2F5FA8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="OutlineButton" TargetType="Button">
+            <Setter Property="Foreground" Value="#222"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="White" BorderBrush="#3B6FCB" BorderThickness="1.5"
+                                CornerRadius="5" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#EAF1FC"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Border x:Name="RecordCard" Background="White" Padding="26,22,26,24">
+            <StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Medical Records" FontFamily="{StaticResource TitleFont}"
+                               FontSize="26" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding CodeText}" Foreground="#777" FontSize="13"
+                               VerticalAlignment="Bottom" Margin="10,0,0,5"/>
+                </StackPanel>
+
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="{Binding PatientName}" FontSize="20" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding PatientLine}" FontSize="12" Foreground="#666" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                        <TextBlock Text="{Binding DateLabel}" FontSize="13" HorizontalAlignment="Right"/>
+                        <TextBlock Text="Recorded" FontSize="13" Foreground="#444"
+                                   HorizontalAlignment="Right" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Grid>
+
+                <Border Height="2" Background="#E2E2E2" Margin="0,8,0,10"/>
+
+                <UniformGrid Columns="4">
+                    <Border Style="{StaticResource VitalCard}" Margin="0,0,3,0">
+                        <StackPanel>
+                            <TextBlock Text="BP" Style="{StaticResource VitalLabel}"/>
+                            <TextBlock Text="{Binding BpText}" Style="{StaticResource VitalValue}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource VitalCard}">
+                        <StackPanel>
+                            <TextBlock Text="Temp" Style="{StaticResource VitalLabel}"/>
+                            <TextBlock Text="{Binding TempText}" Style="{StaticResource VitalValue}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource VitalCard}">
+                        <StackPanel>
+                            <TextBlock Text="Pulse" Style="{StaticResource VitalLabel}"/>
+                            <TextBlock Text="{Binding PulseText}" Style="{StaticResource VitalValue}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource VitalCard}" Margin="3,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Weight" Style="{StaticResource VitalLabel}"/>
+                            <TextBlock Text="{Binding WeightText}" Style="{StaticResource VitalValue}"/>
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+
+                <TextBlock Text="Diagnosis" Style="{StaticResource SectionLabel}"/>
+                <Border Background="#CFE5FB" CornerRadius="4" Padding="14,5" HorizontalAlignment="Left">
+                    <TextBlock Text="{Binding DiagnosisText}" Foreground="#2F5FCB" FontWeight="SemiBold" FontSize="13"/>
+                </Border>
+
+                <TextBlock Text="Treatment / Prescription" Style="{StaticResource SectionLabel}"/>
+                <TextBlock Text="{Binding TreatmentText}" FontSize="15" TextWrapping="Wrap" LineHeight="24"/>
+
+                <TextBlock Text="Notes" Style="{StaticResource SectionLabel}"/>
+                <TextBlock Text="{Binding NotesText}" FontSize="15" TextWrapping="Wrap"/>
+
+                <TextBlock Text="Attachment" Style="{StaticResource SectionLabel}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                        <Border x:Name="ImageBox" Style="{StaticResource FileBox}" ClipToBounds="True"
+                                MouseLeftButtonUp="ImageBox_Click">
+                            <Grid>
+                                <TextBlock x:Name="ImagePlaceholder" Text="Image" FontSize="20"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Image x:Name="AttachmentImage" Stretch="Uniform" Margin="2" Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+                        <TextBlock x:Name="ImageCaption" Text="{Binding ImageFileText}" FontSize="13" Foreground="#777"
+                                   Margin="4,4,0,0" MaxWidth="150" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <Border Style="{StaticResource FileBox}">
+                            <TextBlock Text="Pdf File" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="{Binding PdfFileText}" FontSize="13" Foreground="#777" Margin="4,4,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel x:Name="ButtonPanel" Grid.Column="2" Width="160"
+                                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,34,0,0">
+                        <Button Content="Print Record" Height="40" Style="{StaticResource BlueButton}" Click="Print_Click"/>
+                        <Button Content="Close" Height="40" Margin="0,10,0,0" Style="{StaticResource OutlineButton}" Click="Close_Click"/>
+                    </StackPanel>
+                </Grid>
+
+            </StackPanel>
+        </Border>
+    </ScrollViewer>
+</Window>
