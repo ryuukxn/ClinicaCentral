@@ -16,21 +16,14 @@ namespace ClinicaCentral
             _db = new DatabaseConnection();
             _users = new UserRepository(_db);
 
-            if (!_db.TestConnection(out string err))
+            Loaded += (s, e) =>
             {
-                MessageBox.Show("Cannot reach the database. Is MySQL running in Laragon?\n\n" + err,
-                    "Database error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-            try
-            {
-                _users.EnsureDefaultAdmin();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Could not prepare the users table:\n\n" + ex.Message,
-                    "Database error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+                if (!_db.TestConnection(out string err))
+                {
+                    MessageBox.Show("Cannot reach the database. Is MySQL running in Laragon?\n\n" + err,
+                        "Database error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            };
         }
 
         private void TxtPassword_PasswordChanged(object sender, RoutedEventArgs e)
@@ -65,12 +58,14 @@ namespace ClinicaCentral
 
                 Window dashboard;
 
-                if (user is StaffUser)
+                if (user is PatientUser patient)
+                    dashboard = new dashboard_patient(patient);
+                else if (user is StaffUser)
                     dashboard = new dashboard_staff(user.Username);
                 else
                     dashboard = new dashboard_admin(user);
 
-                dashboard.Show();
+                dashboard.Open();
                 Close();
             }
             catch (Exception ex)
@@ -82,7 +77,7 @@ namespace ClinicaCentral
 
         private void Register_Click(object sender, RoutedEventArgs e)
         {
-            new register_form().Show();
+            new register_form().Open();
             Close();
         }
     }
