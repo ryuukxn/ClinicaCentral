@@ -74,6 +74,20 @@ namespace ClinicaCentral
         public override bool CanManageStaff() => false;
     }
 
+    public class PatientUser : User
+    {
+        public int PatientId { get; }
+
+        public PatientUser(string username, int patientId) : base(username)
+        {
+            PatientId = patientId;
+        }
+
+        public override string Role => "Patient";
+
+        public override bool CanManageStaff() => false;
+    }
+
     public sealed class UserAccountRow
     {
         public int Id { get; init; }
