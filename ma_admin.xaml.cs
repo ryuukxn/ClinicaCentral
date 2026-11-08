@@ -18,18 +18,21 @@ namespace ClinicaCentral
             _user = user;
             _accounts = new UserAccountRepository(new DatabaseConnection());
 
-            try
+            Loaded += (s, e) =>
             {
-                RefreshAccounts();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "Could not connect to the database.\n\n" + ex.Message,
-                    "Database error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
+                try
+                {
+                    RefreshAccounts();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        "Could not connect to the database.\n\n" + ex.Message,
+                        "Database error",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+            };
         }
 
         private void RefreshAccounts()
@@ -124,124 +127,42 @@ namespace ClinicaCentral
 
         private void SaveAccount_Click(object sender, RoutedEventArgs e)
         {
-            string name = NameBox.Text.Trim();
-            string email = EmailBox.Text.Trim();
-            string password = PasswordBox.Password;
-            string role = (RoleBox.SelectedItem as ComboBoxItem)?.Content?.ToString()
-                          ?? "Patient";
-
-            if (string.IsNullOrWhiteSpace(name) ||
-                string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(password))
-            {
-                MessageBox.Show(
-                    "Full name, email, role, and password are required.",
-                    "Add Account",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-                return;
-            }
-
-            try
-            {
-                _accounts.CreateAccount(name, email, role, password);
-
-                MessageBox.Show(
-                    "The account was saved to the database successfully.",
-                    "Account created",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-
-                CancelAdd_Click(sender, e);
-                RefreshAccounts();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "Could not create the account.\n\n" + ex.Message,
-                    "Database error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
         }
 
         private void Edit_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not Button button || button.Tag is not UserAccountRow account)
-                return;
-
-            var dialog = new EditAccountWindow(account)
-            {
-                Owner = this
-            };
-
-            if (dialog.ShowDialog() != true)
-                return;
-
-            try
-            {
-                _accounts.UpdateAccount(
-                    account.Id,
-                    dialog.AccountName,
-                    dialog.AccountEmail,
-                    dialog.AccountRole);
-
-                RefreshAccounts();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "Could not update the account.\n\n" + ex.Message,
-                    "Database error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
         }
 
         private void ToggleStatus_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not Button button || button.Tag is not UserAccountRow account)
-                return;
-
-            try
-            {
-                _accounts.SetStatus(account.Id, account.Status != "Active");
-                RefreshAccounts();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "Could not change the account status.\n\n" + ex.Message,
-                    "Database error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
         }
 
         private void Dashboard_Click(object sender, RoutedEventArgs e)
         {
-            new dashboard_admin(_user).Show();
+            new dashboard_admin(_user).Open();
             Close();
         }
 
         private void Appointments_Click(object sender, RoutedEventArgs e)
         {
-            new appointment_admin(_user).Show();
+            new appointment_admin(_user).Open();
             Close();
         }
 
         private void Receipts_Click(object sender, RoutedEventArgs e)
         {
-            new receipt_admin(_user).Show();
+            new receipt_admin(_user).Open();
             Close();
         }
 
         private void NavigationPlaceholder_Click(object sender, RoutedEventArgs e)
         {
-            string page = (sender as Button)?.Content?.ToString() ?? "Page";
-            MessageBox.Show(
-                $"Connect the {page} button to its existing page.",
-                "ClinicaCentral");
+        }
+
+        private void Backup_Click(object sender, RoutedEventArgs e)
+        {
+            new backup_admin(_user).Open();
+            Close();
         }
 
         private void LogOut_Click(object sender, RoutedEventArgs e)
@@ -253,7 +174,7 @@ namespace ClinicaCentral
                     MessageBoxImage.Question) != MessageBoxResult.Yes)
                 return;
 
-            new login_form().Show();
+            new login_form().Open();
             Close();
         }
     }
