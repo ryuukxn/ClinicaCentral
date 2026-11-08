@@ -23,7 +23,7 @@ namespace ClinicaCentral
             _patients = new PatientRepository(new DatabaseConnection());
             _displayName = displayName;
             WelcomeText.Text = $"Welcome back, {displayName}!";
-            LoadPatients();
+            Loaded += (s, e) => LoadPatients();
         }
 
         private void LoadPatients()
@@ -114,8 +114,6 @@ namespace ClinicaCentral
 
         private void Add_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Add patient is not available yet.", "Coming soon",
-                MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void Nav_Click(object sender, RoutedEventArgs e)
@@ -126,13 +124,25 @@ namespace ClinicaCentral
 
             if (page == "Dashboard")
             {
-                new dashboard_staff(_displayName).Show();
+                new dashboard_staff(_displayName).Open();
                 Close();
                 return;
             }
 
-            MessageBox.Show($"The {page} page is not available yet.", "Coming soon",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            if (page == "Medical Records")
+            {
+                new mr_staff(_displayName).Open();
+                Close();
+                return;
+            }
+
+            if (page == "Schedule")
+            {
+                new sc_staff(_displayName).Open();
+                Close();
+                return;
+            }
+
         }
 
         private void Logout_Click(object sender, RoutedEventArgs e)
@@ -142,7 +152,7 @@ namespace ClinicaCentral
 
             if (answer != MessageBoxResult.Yes) return;
 
-            new login_form().Show();
+            new login_form().Open();
             Close();
         }
     }
