@@ -20,7 +20,7 @@ namespace ClinicaCentral
             _receipts = new ReceiptRepository(new DatabaseConnection());
 
             lblWelcome.Text = _user.GetWelcomeMessage();
-            LoadReceipts();
+            Loaded += (s, e) => LoadReceipts();
         }
 
         private void LoadReceipts()
@@ -112,43 +112,34 @@ namespace ClinicaCentral
             receipt_preview preview = new receipt_preview(item);
             preview.Owner = this;
             preview.ShowDialog();
-
-            if (!preview.WasPrinted) return;
-
-            try
-            {
-                _receipts.MarkPrinted(item.Id);
-                LoadReceipts();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Could not update the receipt status.\n\n" + ex.Message,
-                    "Database error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
         }
 
         private void Dashboard_Click(object sender, RoutedEventArgs e)
         {
-            new dashboard_admin(_user).Show();
+            new dashboard_admin(_user).Open();
             Close();
         }
 
         private void ManageAccount_Click(object sender, RoutedEventArgs e)
         {
-            new ma_admin(_user).Show();
+            new ma_admin(_user).Open();
             Close();
         }
 
         private void Appointments_Click(object sender, RoutedEventArgs e)
         {
-            new appointment_admin(_user).Show();
+            new appointment_admin(_user).Open();
             Close();
         }
 
         private void NavigationPlaceholder_Click(object sender, RoutedEventArgs e)
         {
-            string page = (sender as Button)?.Content?.ToString() ?? "This";
-            MessageBox.Show("The " + page + " page is coming next.", "ClinicaCentral");
+        }
+
+        private void Backup_Click(object sender, RoutedEventArgs e)
+        {
+            new backup_admin(_user).Open();
+            Close();
         }
 
         private void LogOut_Click(object sender, RoutedEventArgs e)
@@ -158,7 +149,7 @@ namespace ClinicaCentral
 
             if (answer != MessageBoxResult.Yes) return;
 
-            new login_form().Show();
+            new login_form().Open();
             Close();
         }
     }

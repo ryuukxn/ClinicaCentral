@@ -186,7 +186,7 @@
                     <Button Content="Manage Account" Tag="&#xE77B;" Style="{StaticResource NavButton}" Click="ManageAccount_Click"/>
                     <Button Content="Appointments"   Tag="&#xE787;" Style="{StaticResource NavButton}" Click="Appointments_Click"/>
                     <Button Content="Receipts"       Tag="&#xE7C3;" Style="{StaticResource NavButtonActive}"/>
-                    <Button Content="Backup"         Tag="&#xE895;" Style="{StaticResource NavButton}" Click="NavigationPlaceholder_Click"/>
+                    <Button Content="Backup"         Tag="&#xE895;" Style="{StaticResource NavButton}" Click="Backup_Click"/>
                 </StackPanel>
             </DockPanel>
         </Border>
