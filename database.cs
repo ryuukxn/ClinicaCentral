@@ -32,22 +32,6 @@ using MySqlConnector;
                 return false;
             }
         }
-        public static void EnsureDefaultAdmin()
-        {
-            using var conn = GetConnection();
-            conn.Open();
-
-            using var check = new MySqlCommand("SELECT COUNT(*) FROM users", conn);
-            if (Convert.ToInt32(check.ExecuteScalar()) > 0) return;
-
-            using var insert = new MySqlCommand(
-                "INSERT INTO users (username, email, password_hash, role) VALUES (@u, @e, @p, 'Admin')", conn);
-            insert.Parameters.AddWithValue("@u", "admin");
-            insert.Parameters.AddWithValue("@e", "admin@clinicacentral.local");
-            insert.Parameters.AddWithValue("@p", BCrypt.Net.BCrypt.HashPassword("admin123"));
-            insert.ExecuteNonQuery();
-        }
-
         public static bool Authenticate(string login, string password, out string username, out string role)
         {
             username = "";
