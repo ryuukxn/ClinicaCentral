@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 
 namespace ClinicaCentral
 {
@@ -9,9 +10,14 @@ namespace ClinicaCentral
             InitializeComponent();
         }
 
-        private void BackToLogin_Click(object sender, RoutedEventArgs e)
+        private void Password_Changed(object sender, RoutedEventArgs e)
         {
-            new login_form().Show();
+            hintPassword.Visibility = txtPassword.Password.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            new login_form().Open();
             Close();
         }
     }
