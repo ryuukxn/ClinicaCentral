@@ -23,7 +23,7 @@ namespace ClinicaCentral
 
             _displayName = displayName;
             WelcomeText.Text = $"Welcome back, {displayName}!";
-            LoadDashboard();
+            Loaded += (s, e) => LoadDashboard();
         }
 
         private void LoadDashboard()
@@ -90,13 +90,25 @@ namespace ClinicaCentral
                 return;
             }
 
-            MessageBox.Show($"The {page} page is not available yet.", "Coming soon",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            if (page == "Medical Records")
+            {
+                new mr_staff(_displayName).Open();
+                Close();
+                return;
+            }
+
+            if (page == "Schedule")
+            {
+                new sc_staff(_displayName).Open();
+                Close();
+                return;
+            }
+
         }
 
         private void OpenPatientRecords()
         {
-            new pr_staff(_displayName).Show();
+            new pr_staff(_displayName).Open();
             Close();
         }
 
@@ -107,21 +119,15 @@ namespace ClinicaCentral
 
         private void EditPatient_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Edit patient is not available yet.", "Coming soon");
         }
 
         private void DeletePatient_Click(object sender, RoutedEventArgs e)
         {
-            var answer = MessageBox.Show(
-                "Delete this patient record? This cannot be undone.",
-                "Confirm delete", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
-
-            if (answer != MessageBoxResult.Yes) return;
         }
 
         private void PrintReceipt_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Print receipt is not available yet.", "Coming soon");
+            receipt_picker.ShowFor(this, _displayName);
         }
 
         private void Logout_Click(object sender, RoutedEventArgs e)
@@ -131,7 +137,7 @@ namespace ClinicaCentral
 
             if (answer != MessageBoxResult.Yes) return;
 
-            new login_form().Show();
+            new login_form().Open();
             Close();
         }
     }

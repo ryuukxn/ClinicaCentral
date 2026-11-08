@@ -23,7 +23,7 @@ namespace ClinicaCentral
             _staff = new StaffRepository(db);
 
             lblWelcome.Text = _user.GetWelcomeMessage();
-            LoadData();
+            Loaded += (s, e) => LoadData();
         }
 
         private void LoadData()
@@ -123,31 +123,36 @@ namespace ClinicaCentral
 
             if (page == "Manage Account")
             {
-                new ma_admin(_user).Show();
+                new ma_admin(_user).Open();
                 Close();
                 return;
             }
 
             if (page == "Appointments")
             {
-                new appointment_admin(_user).Show();
+                new appointment_admin(_user).Open();
                 Close();
                 return;
             }
 
             if (page == "Receipts")
             {
-                new receipt_admin(_user).Show();
+                new receipt_admin(_user).Open();
                 Close();
                 return;
             }
 
-            MessageBox.Show($"The {page} page is coming next.", "ClinicaCentral");
         }
 
         private void PrintReceipt_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Receipt printing is coming next.", "ClinicaCentral");
+            receipt_picker.ShowFor(this);
+        }
+
+        private void Backup_Click(object sender, RoutedEventArgs e)
+        {
+            new backup_admin(_user).Open();
+            Close();
         }
 
         private void LogOut_Click(object sender, RoutedEventArgs e)
@@ -156,7 +161,7 @@ namespace ClinicaCentral
                 MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result != MessageBoxResult.Yes) return;
 
-            new login_form().Show();
+            new login_form().Open();
             Close();
         }
     }
