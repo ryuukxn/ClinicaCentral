@@ -49,8 +49,6 @@ namespace ClinicaCentral
             var finished = new List<AppointmentRecord>();
 
             using var conn = OpenConnection();
-            EnsureDoctorColumn(conn);
-
             using var cmd = new MySqlCommand(
                 "SELECT a.id, a.appointment_date, CONCAT(p.first_name, ' ', p.last_name), a.doctor, a.status " +
                 "FROM appointments a JOIN patients p ON p.id = a.patient_id " +
@@ -67,41 +65,14 @@ namespace ClinicaCentral
                 item.Status = reader.IsDBNull(4) ? "" : Convert.ToString(reader.GetValue(4)) ?? "";
 
                 if (item.IsFinished)
-                    finished.Insert(0, item);
+                    finished.Add(item);
                 else
                     upcoming.Add(item);
             }
 
+            finished.Reverse();
             upcoming.AddRange(finished);
             return upcoming;
-        }
-
-        public void Cancel(int id)
-        {
-            using var conn = OpenConnection();
-            using var cmd = new MySqlCommand(
-                "UPDATE appointments SET status = 'Cancelled' " +
-                "WHERE id = @id AND status NOT IN ('Completed', 'Cancelled')", conn);
-            cmd.Parameters.AddWithValue("@id", id);
-
-            if (cmd.ExecuteNonQuery() == 0)
-                throw new InvalidOperationException("This appointment can no longer be cancelled.");
-        }
-
-        private void EnsureDoctorColumn(MySqlConnection conn)
-        {
-            using var check = new MySqlCommand(
-                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
-                "WHERE TABLE_SCHEMA = DATABASE() " +
-                "AND TABLE_NAME = 'appointments' " +
-                "AND COLUMN_NAME = 'doctor'", conn);
-
-            bool exists = Convert.ToInt32(check.ExecuteScalar()) > 0;
-            if (exists) return;
-
-            using var alter = new MySqlCommand(
-                "ALTER TABLE appointments ADD COLUMN doctor VARCHAR(100) NULL", conn);
-            alter.ExecuteNonQuery();
         }
     }
 }

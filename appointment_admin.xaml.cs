@@ -20,7 +20,7 @@ namespace ClinicaCentral
             _appointments = new AppointmentRepository(new DatabaseConnection());
 
             lblWelcome.Text = _user.GetWelcomeMessage();
-            LoadAppointments();
+            Loaded += (s, e) => LoadAppointments();
         }
 
         private void LoadAppointments()
@@ -127,48 +127,34 @@ namespace ClinicaCentral
 
         private void CancelAppointment_Click(object sender, RoutedEventArgs e)
         {
-            if (!(sender is Button button) || !(button.Tag is AppointmentRecord item)) return;
-
-            MessageBoxResult answer = MessageBox.Show(
-                "Cancel the appointment of " + item.Patient + " on " + item.WhenText + "?",
-                "Cancel appointment", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
-
-            if (answer != MessageBoxResult.Yes) return;
-
-            try
-            {
-                _appointments.Cancel(item.Id);
-                LoadAppointments();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Could not cancel the appointment.\n\n" + ex.Message,
-                    "Database error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
         }
 
         private void Dashboard_Click(object sender, RoutedEventArgs e)
         {
-            new dashboard_admin(_user).Show();
+            new dashboard_admin(_user).Open();
             Close();
         }
 
         private void ManageAccount_Click(object sender, RoutedEventArgs e)
         {
-            new ma_admin(_user).Show();
+            new ma_admin(_user).Open();
             Close();
         }
 
         private void Receipts_Click(object sender, RoutedEventArgs e)
         {
-            new receipt_admin(_user).Show();
+            new receipt_admin(_user).Open();
             Close();
         }
 
         private void NavigationPlaceholder_Click(object sender, RoutedEventArgs e)
         {
-            string page = (sender as Button)?.Content?.ToString() ?? "This";
-            MessageBox.Show("The " + page + " page is coming next.", "ClinicaCentral");
+        }
+
+        private void Backup_Click(object sender, RoutedEventArgs e)
+        {
+            new backup_admin(_user).Open();
+            Close();
         }
 
         private void LogOut_Click(object sender, RoutedEventArgs e)
@@ -178,7 +164,7 @@ namespace ClinicaCentral
 
             if (answer != MessageBoxResult.Yes) return;
 
-            new login_form().Show();
+            new login_form().Open();
             Close();
         }
     }
