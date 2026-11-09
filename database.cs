@@ -55,6 +55,61 @@ using MySqlConnector;
             return true;
         }
 
+        public static int RegisterPatient(RegistrationData d)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            using var tx = conn.BeginTransaction();
+
+            try
+            {
+                long userId;
+                using (var cmd = new MySqlCommand(
+                    "INSERT INTO users (username, email, password_hash, role, status) " +
+                    "VALUES (@u, @e, @h, 'Patient', 'Active')", conn, tx))
+                {
+                    cmd.Parameters.AddWithValue("@u", d.Username);
+                    cmd.Parameters.AddWithValue("@e", d.Email);
+                    cmd.Parameters.AddWithValue("@h", BCrypt.Net.BCrypt.HashPassword(d.Password));
+                    cmd.ExecuteNonQuery();
+                    userId = cmd.LastInsertedId;
+                }
+
+                long patientId;
+                using (var cmd = new MySqlCommand(
+                    "INSERT INTO patients (user_id, first_name, last_name, birthdate, contact, address, gender, allergies) " +
+                    "VALUES (@uid, @fn, @ln, @b, @c, @a, @g, @al)", conn, tx))
+                {
+                    cmd.Parameters.AddWithValue("@uid", userId);
+                    cmd.Parameters.AddWithValue("@fn", d.FirstName);
+                    cmd.Parameters.AddWithValue("@ln", d.LastName);
+                    cmd.Parameters.AddWithValue("@b", d.BirthDate.Date);
+                    cmd.Parameters.AddWithValue("@c", d.Contact);
+                    cmd.Parameters.AddWithValue("@a", d.Address);
+                    cmd.Parameters.AddWithValue("@g", d.Gender);
+                    cmd.Parameters.AddWithValue("@al", (object?)d.Allergies ?? DBNull.Value);
+                    cmd.ExecuteNonQuery();
+                    patientId = cmd.LastInsertedId;
+                }
+
+                using (var cmd = new MySqlCommand(
+                    "UPDATE users SET patient_id = @pid WHERE id = @uid", conn, tx))
+                {
+                    cmd.Parameters.AddWithValue("@pid", patientId);
+                    cmd.Parameters.AddWithValue("@uid", userId);
+                    cmd.ExecuteNonQuery();
+                }
+
+                tx.Commit();
+                return (int)patientId;
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
+        }
+
         public static int CountRows(string table)
         {
             if (table != "patients" && table != "staff" && table != "appointments")
@@ -106,6 +161,20 @@ using MySqlConnector;
                 });
             }
             return list;
+        }
+
+        public class RegistrationData
+        {
+            public string Username  { get; set; } = "";
+            public string Password  { get; set; } = "";
+            public string FirstName { get; set; } = "";
+            public string LastName  { get; set; } = "";
+            public DateTime BirthDate { get; set; }
+            public string Gender    { get; set; } = "";
+            public string Email     { get; set; } = "";
+            public string Contact   { get; set; } = "";
+            public string Address   { get; set; } = "";
+            public string? Allergies { get; set; }
         }
     }
 }
