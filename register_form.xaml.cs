@@ -89,7 +89,7 @@ namespace ClinicaCentral
                 Database.RegisterPatient(data);
 
                 MessageBox.Show("Registration successful! You can now log in.",
-                    "Registration", MessageBoxButton.OK, MessageBoxImage.Information);
+                    "Registration!", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 new login_form().Open();
                 Close();

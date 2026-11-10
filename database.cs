@@ -55,6 +55,8 @@ using MySqlConnector;
             return true;
         }
 
+
+        //patient registratrion
         public static int RegisterPatient(RegistrationData d)
         {
             using var conn = GetConnection();

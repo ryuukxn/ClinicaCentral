@@ -320,7 +320,7 @@
                         <Button x:Name="btnCancel" Content="Cancel" Style="{StaticResource OutlineButton}"
                                 Width="120" Height="48" Margin="0,0,16,0" Click="Cancel_Click"/>
                         <Button x:Name="btnRegister" Content="Register" Style="{StaticResource PrimaryButton}"
-                                Width="150" Height="48" Click="Register_Click"/>
+                                    Width="150" Height="48" Click="Register_Click"/>  
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
