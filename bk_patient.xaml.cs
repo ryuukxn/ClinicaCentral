@@ -324,7 +324,6 @@ namespace ClinicaCentral
                 using var conn = Database.GetConnection();
                 conn.Open();
 
-                // 1. Kunin ang tamang staff_id mula sa staff table base sa pangalan ng doktor
                 int staffId = 0;
                 string getStaffIdQuery = "SELECT id FROM staff WHERE full_name = @docName LIMIT 1";
                 using (var cmdStaff = new MySqlCommand(getStaffIdQuery, conn))
@@ -343,13 +342,12 @@ namespace ClinicaCentral
                     return;
                 }
 
-                // 2. I-save na ang appointment kasama ang nakuha nating staff_id
                 string query = "INSERT INTO appointments (patient_id, staff_id, appointment_date, status, notes, doctor) " +
                             "VALUES (@pid, @sid, @adate, 'Pending', @notes, @docName)";
 
                 using var cmd = new MySqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@pid", _user.PatientId);
-                cmd.Parameters.AddWithValue("@sid", staffId); // Heto na ang totoong ID mula sa staff table
+                cmd.Parameters.AddWithValue("@sid", staffId);
                 cmd.Parameters.AddWithValue("@adate", appointmentDateTime);
                 cmd.Parameters.AddWithValue("@notes", string.IsNullOrEmpty(notes) ? (object)DBNull.Value : notes);
                 cmd.Parameters.AddWithValue("@docName", doctor.Name);
