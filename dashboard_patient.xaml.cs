@@ -4,6 +4,8 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using MySqlConnector;
+using Microsoft.VisualBasic;
 
 namespace ClinicaCentral
 {
@@ -100,10 +102,97 @@ namespace ClinicaCentral
 
         private void EditAppointment_Click(object sender, RoutedEventArgs e)
         {
+            if (sender is FrameworkElement button && button.DataContext != null)
+            {
+                var property = button.DataContext.GetType().GetProperty("Id");
+                if (property != null)
+                {
+                    int appointmentId = Convert.ToInt32(property.GetValue(button.DataContext));
+
+                    string currentNotes = "";
+
+                    string updatedNotes = Microsoft.VisualBasic.Interaction.InputBox(
+                        "Ilagay ang bagong Notes o Dahilan para sa appointment na ito:", 
+                        "Edit Appointment", 
+                        currentNotes);
+
+                    if (string.IsNullOrEmpty(updatedNotes)) return;
+
+                    try
+                    {
+                        using var conn = Database.GetConnection();
+                        conn.Open();
+
+                        string query = "UPDATE appointments SET notes = @notes WHERE id = @id AND patient_id = @pid";
+                        using var cmd = new MySqlCommand(query, conn);
+                        cmd.Parameters.AddWithValue("@notes", updatedNotes);
+                        cmd.Parameters.AddWithValue("@id", appointmentId);
+                        cmd.Parameters.AddWithValue("@pid", _user.PatientId);
+
+                        int rowsAffected = cmd.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            MessageBox.Show("Successfully updated appointment!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                            LoadDashboard();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Appointment not found or could not be updated.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Nagkaroon ng problema sa database:\n\n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
         }
+        
 
         private void DeleteAppointment_Click(object sender, RoutedEventArgs e)
         {
+            if (sender is FrameworkElement button && button.DataContext != null)
+            {
+                var property = button.DataContext.GetType().GetProperty("Id");
+                if (property != null)
+                {
+                    int appointmentId = Convert.ToInt32(property.GetValue(button.DataContext));
+
+                    var confirm = MessageBox.Show("Sigurado ka bang gusto mong kanselahin o tanggalin ang appointment na ito?", 
+                        "Kumpirmahin ang Pag-delete", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                    if (confirm != MessageBoxResult.Yes) return;
+
+                    try
+                    {
+                        using var conn = Database.GetConnection();
+                        conn.Open();
+
+                        string query = "DELETE FROM appointments WHERE id = @id AND patient_id = @pid";
+                        using var cmd = new MySqlCommand(query, conn);
+                        cmd.Parameters.AddWithValue("@id", appointmentId);
+                        cmd.Parameters.AddWithValue("@pid", _user.PatientId);
+
+                        int rowsAffected = cmd.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            MessageBox.Show("Matagumpay na natanggal ang appointment.", "Tagumpay", MessageBoxButton.OK, MessageBoxImage.Information);
+                            // I-reload ang dashboard para mag-update ang listahan
+                            LoadDashboard();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Hindi natagpuan o hindi ma-delete ang appointment.", "Babala", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Nagkaroon ng problema sa database:\n\n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
         }
 
         private void Nav_Click(object sender, RoutedEventArgs e)

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
+using MySqlConnector;
+
 
 namespace ClinicaCentral
 {
@@ -62,7 +64,19 @@ namespace ClinicaCentral
 
             try
             {
-                doctors.AddRange(_repo.GetDoctors());
+                using var conn = Database.GetConnection();
+                conn.Open();
+
+                string query = "SELECT full_name FROM staff WHERE status = 'On Duty' AND position = 'Doctor' ORDER BY full_name ASC";
+                
+                using var cmd = new MySqlCommand(query, conn);
+                using var reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    string doctorName = reader.GetString(0);
+                    doctors.Add(new DoctorOption { IsPlaceholder = false, Name = doctorName });
+                }
             }
             catch (Exception ex)
             {
@@ -72,7 +86,7 @@ namespace ClinicaCentral
             }
 
             DoctorBox.ItemsSource = doctors;
-            DoctorBox.DisplayMemberPath = "Display";
+            DoctorBox.DisplayMemberPath = "Name";
             DoctorBox.SelectedIndex = 0;
         }
 
@@ -270,7 +284,89 @@ namespace ClinicaCentral
 
         private void Book_Click(object sender, RoutedEventArgs e)
         {
+            if (_user.PatientId <= 0)
+            {
+                MessageBox.Show("Your account is not linked to a patient record.", "Book Appointment", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            DoctorOption? doctor = DoctorBox.SelectedItem as DoctorOption;
+            if (doctor == null || doctor.IsPlaceholder)
+            {
+                MessageBox.Show("Please select a doctor.", "Book Appointment", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            DateTime? date = DateBox.SelectedDate;
+            if (date == null)
+            {
+                MessageBox.Show("Please select a date.", "Book Appointment", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            TimeSlot? slot = TimeBox.SelectedItem as TimeSlot;
+            if (slot == null || slot.IsPlaceholder)
+            {
+                slot = SelectedSlot();
+            }
+
+            if (slot == null)
+            {
+                MessageBox.Show("Please select a time slot.", "Book Appointment", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            DateTime appointmentDateTime = date.Value.Date + slot.Time;
+            string notes = NotesBox.Text.Trim();
+
+            try
+            {
+                using var conn = Database.GetConnection();
+                conn.Open();
+
+                // 1. Kunin ang tamang staff_id mula sa staff table base sa pangalan ng doktor
+                int staffId = 0;
+                string getStaffIdQuery = "SELECT id FROM staff WHERE full_name = @docName LIMIT 1";
+                using (var cmdStaff = new MySqlCommand(getStaffIdQuery, conn))
+                {
+                    cmdStaff.Parameters.AddWithValue("@docName", doctor.Name);
+                    var result = cmdStaff.ExecuteScalar();
+                    if (result != null)
+                    {
+                        staffId = Convert.ToInt32(result);
+                    }
+                }
+
+                if (staffId <= 0)
+                {
+                    MessageBox.Show("Could not find the selected doctor in the database.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // 2. I-save na ang appointment kasama ang nakuha nating staff_id
+                string query = "INSERT INTO appointments (patient_id, staff_id, appointment_date, status, notes, doctor) " +
+                            "VALUES (@pid, @sid, @adate, 'Pending', @notes, @docName)";
+
+                using var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@pid", _user.PatientId);
+                cmd.Parameters.AddWithValue("@sid", staffId); // Heto na ang totoong ID mula sa staff table
+                cmd.Parameters.AddWithValue("@adate", appointmentDateTime);
+                cmd.Parameters.AddWithValue("@notes", string.IsNullOrEmpty(notes) ? (object)DBNull.Value : notes);
+                cmd.Parameters.AddWithValue("@docName", doctor.Name);
+
+                cmd.ExecuteNonQuery();
+
+                MessageBox.Show("Successfully booked your appointment!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                GoToDashboard();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to save the appointment. Please ensure Laragon MySQL is running.\n\n" + ex.Message,
+                    "Server error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
+        
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
@@ -321,5 +417,7 @@ namespace ClinicaCentral
             new login_form().Open();
             Close();
         }
+
+        
     }
 }
