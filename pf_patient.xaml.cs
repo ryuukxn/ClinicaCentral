@@ -143,8 +143,36 @@ namespace ClinicaCentral
         }
 
         private void EditProfile_Click(object sender, RoutedEventArgs e)
+{
+    if (_user.PatientId <= 0)
+    {
+        MessageBox.Show("Your account is not linked to a patient record yet.",
+            "ClinicaCentral", MessageBoxButton.OK, MessageBoxImage.Information);
+        return;
+    }
+
+    try
+    {
+        ProfileEdit.ContactInfo current = ProfileEdit.GetContactInfo(_user.PatientId);
+
+        var dlg = new EditProfileDialog(current.Email, current.Contact, current.Address, current.Allergies)
         {
-        }
+            Owner = this
+        };
+        if (dlg.ShowDialog() != true) return;
+
+        ProfileEdit.UpdateProfile(_user.PatientId, dlg.Email, dlg.Contact, dlg.Address, dlg.Allergies);
+
+        LoadProfile();
+        MessageBox.Show("Your profile was updated.", "Edit Profile",
+            MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show("Your profile could not be saved.\n\n" + ex.Message, "Edit Profile",
+            MessageBoxButton.OK, MessageBoxImage.Warning);
+    }
+}
 
         private void Nav_Click(object sender, RoutedEventArgs e)
         {
