@@ -11,12 +11,13 @@ namespace ClinicaCentral
         private readonly MedicalRecordRow _record;
         private byte[]? _uploadBytes;
 
-        public mr_view(MedicalRecordRow record)
+        public mr_view(MedicalRecordRow record, bool showPrescriptions = false)
         {
             InitializeComponent();
 
             _record = record;
             DataContext = _record;
+            PrescriptionSection.Visibility = showPrescriptions ? Visibility.Visible : Visibility.Collapsed;
 
             Loaded += (s, e) => LoadUploadedImage();
         }

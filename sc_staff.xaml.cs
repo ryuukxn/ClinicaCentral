@@ -1,5 +1,7 @@
 using System;
+using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -12,6 +14,8 @@ namespace ClinicaCentral
         private readonly ScheduleRepository _schedule;
         private readonly System.Collections.Generic.List<UIElement> _cells =
             new System.Collections.Generic.List<UIElement>();
+        private readonly ObservableCollection<PrescriptionInput> _prescriptionInputs =
+            new ObservableCollection<PrescriptionInput>();
         private AppointmentCompletionContext? _completionContext;
 
         public sc_staff() : this("Doctor") { }
@@ -22,6 +26,7 @@ namespace ClinicaCentral
 
             _schedule = new ScheduleRepository(new DatabaseConnection());
             _displayName = displayName;
+            PrescriptionRows.ItemsSource = _prescriptionInputs;
 
             WelcomeText.Text = $"Welcome back, {displayName}!";
             HealthyRadio.Checked += CompletionType_Changed;
@@ -128,6 +133,13 @@ namespace ClinicaCentral
 
         private void AddTimeOff_Click(object sender, RoutedEventArgs e)
         {
+            TimeOffStartDate.SelectedDate = DateTime.Today;
+            TimeOffEndDate.SelectedDate = DateTime.Today;
+            TimeOffScopeBox.SelectedIndex = 2;
+            TimeOffTypeBox.SelectedIndex = 0;
+            TimeOffDescriptionInput.Clear();
+            UpdateTimeOffDescriptionVisibility();
+            TimeOffOverlay.Visibility = Visibility.Visible;
         }
 
         private void Confirm_Click(object sender, RoutedEventArgs e)
@@ -178,7 +190,8 @@ namespace ClinicaCentral
                 AppointmentId = appointment.Id,
                 PatientId = appointment.PatientId,
                 PatientName = appointment.Patient,
-                DoctorName = _displayName
+                DoctorName = appointment.DoctorName,
+                DoctorIdentifier = _displayName
             };
             CompletionPanel.DataContext = _completionContext;
             ClearCompletionInputs();
@@ -202,6 +215,8 @@ namespace ClinicaCentral
         {
             bool healthy = HealthyRadio.IsChecked == true;
             PrescriptionFields.IsEnabled = !healthy;
+            if (!healthy && _prescriptionInputs.Count == 0)
+                _prescriptionInputs.Add(new PrescriptionInput());
         }
 
         private void SaveComplete_Click(object sender, RoutedEventArgs e)
@@ -217,17 +232,28 @@ namespace ClinicaCentral
                 return;
             }
 
-            string medicine = MedicineInput.Text.Trim();
-            string dosage = DosageInput.Text.Trim();
-            string frequency = FrequencyInput.Text.Trim();
-            string duration = DurationInput.Text.Trim();
+            List<PrescriptionInput> prescriptions = _prescriptionInputs
+                .Where(input => !IsEmptyPrescription(input))
+                .ToList();
             if (needsPrescription)
             {
-                if (medicine.Length == 0 || dosage.Length == 0 ||
-                    frequency.Length == 0 || duration.Length == 0)
+                if (prescriptions.Count == 0)
                 {
-                    ShowCompletionValidation("Complete the medicine, dosage, frequency, and duration fields.");
+                    ShowCompletionValidation("Add at least one complete prescription.");
                     return;
+                }
+
+                for (int i = 0; i < prescriptions.Count; i++)
+                {
+                    PrescriptionInput prescription = prescriptions[i];
+                    if (prescription.MedicineName.Length == 0 || prescription.Dosage.Length == 0 ||
+                        prescription.Frequency.Length == 0 || prescription.Duration.Length == 0)
+                    {
+                        ShowCompletionValidation(
+                            "Complete the medicine name, dosage, frequency, and duration for prescription " +
+                            (i + 1).ToString(CultureInfo.InvariantCulture) + ".");
+                        return;
+                    }
                 }
             }
 
@@ -243,7 +269,7 @@ namespace ClinicaCentral
             {
                 AppointmentId = _completionContext.AppointmentId,
                 PatientId = _completionContext.PatientId,
-                Doctor = _completionContext.DoctorName,
+                Doctor = _completionContext.DoctorIdentifier,
                 Diagnosis = diagnosis,
                 Notes = OptionalText(NotesInput),
                 Bp = OptionalText(BpInput),
@@ -252,11 +278,7 @@ namespace ClinicaCentral
                 WeightKg = weightKg,
                 Treatment = OptionalText(TreatmentInput),
                 NeedsPrescription = needsPrescription,
-                MedicineName = medicine,
-                Dosage = dosage,
-                Frequency = frequency,
-                Duration = duration,
-                Description = needsPrescription ? OptionalText(PrescriptionDescriptionInput) : null
+                Prescriptions = needsPrescription ? prescriptions : new System.Collections.Generic.List<PrescriptionInput>()
             };
 
             try
@@ -324,6 +346,17 @@ namespace ClinicaCentral
             CloseCompletionPanel();
         }
 
+        private void AddPrescription_Click(object sender, RoutedEventArgs e)
+        {
+            _prescriptionInputs.Add(new PrescriptionInput());
+        }
+
+        private void RemovePrescription_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is PrescriptionInput input)
+                _prescriptionInputs.Remove(input);
+        }
+
         private void CloseCompletionPanel()
         {
             CompletionOverlay.Visibility = Visibility.Collapsed;
@@ -343,11 +376,79 @@ namespace ClinicaCentral
             PulseInput.Clear();
             WeightInput.Clear();
             TreatmentInput.Clear();
-            MedicineInput.Clear();
-            DosageInput.Clear();
-            FrequencyInput.Clear();
-            DurationInput.Clear();
-            PrescriptionDescriptionInput.Clear();
+            _prescriptionInputs.Clear();
+        }
+
+        private static bool IsEmptyPrescription(PrescriptionInput input)
+        {
+            return string.IsNullOrWhiteSpace(input.MedicineName) &&
+                   string.IsNullOrWhiteSpace(input.Dosage) &&
+                   string.IsNullOrWhiteSpace(input.Frequency) &&
+                   string.IsNullOrWhiteSpace(input.Duration) &&
+                   string.IsNullOrWhiteSpace(input.Description);
+        }
+
+        private void TimeOffType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateTimeOffDescriptionVisibility();
+        }
+
+        private void UpdateTimeOffDescriptionVisibility()
+        {
+            if (TimeOffDescriptionPanel == null || !(TimeOffTypeBox.SelectedItem is ComboBoxItem selected))
+                return;
+
+            TimeOffDescriptionPanel.Visibility =
+                string.Equals(Convert.ToString(selected.Content), "Emergency", StringComparison.OrdinalIgnoreCase)
+                    ? Visibility.Collapsed
+                    : Visibility.Visible;
+        }
+
+        private void SaveTimeOff_Click(object sender, RoutedEventArgs e)
+        {
+            DateTime? startDate = TimeOffStartDate.SelectedDate;
+            DateTime? endDate = TimeOffEndDate.SelectedDate;
+            string scope = (TimeOffScopeBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
+            string type = (TimeOffTypeBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
+
+            if (startDate == null || endDate == null || endDate.Value.Date < startDate.Value.Date)
+            {
+                MessageBox.Show("Select a valid start and end date.", "Check the form",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (scope != "AM" && scope != "PM" && scope != "Both")
+            {
+                MessageBox.Show("Select AM, PM, or Both for the time scope.", "Check the form",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (type != "Busy" && type != "On Leave" && type != "Emergency")
+            {
+                MessageBox.Show("Select a reason type.", "Check the form",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            string? reason = type == "Emergency" ? null : OptionalText(TimeOffDescriptionInput);
+            try
+            {
+                _schedule.AddTimeOff(_displayName, startDate.Value, endDate.Value, type, scope, reason);
+                TimeOffOverlay.Visibility = Visibility.Collapsed;
+                LoadSchedule();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Time off could not be saved:\n\n" + ex.Message,
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void CancelTimeOff_Click(object sender, RoutedEventArgs e)
+        {
+            TimeOffOverlay.Visibility = Visibility.Collapsed;
         }
 
         private sealed class AppointmentCompletionContext
@@ -356,6 +457,7 @@ namespace ClinicaCentral
             public int PatientId { get; set; }
             public string PatientName { get; set; } = "";
             public string DoctorName { get; set; } = "";
+            public string DoctorIdentifier { get; set; } = "";
         }
 
         private void Nav_Click(object sender, RoutedEventArgs e)

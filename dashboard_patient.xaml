@@ -301,7 +301,8 @@
                             <TextBlock DockPanel.Dock="Top" Text="Result Condition" Style="{StaticResource CardTitle}" Margin="16,14,0,6"/>
 
                             <Border x:Name="ConditionBand" DockPanel.Dock="Top" Background="#E8E8E8" Padding="16,6">
-                                <TextBlock x:Name="ConditionText" Text="No result yet" FontSize="40" FontWeight="Bold" Foreground="#777"/>
+                                <TextBlock x:Name="ConditionText" Text="No result yet" FontSize="26" FontWeight="Bold"
+                                           Foreground="#777" TextWrapping="Wrap"/>
                             </Border>
 
                             <TextBlock x:Name="ConditionMessage" Text="" FontSize="13" FontWeight="SemiBold"

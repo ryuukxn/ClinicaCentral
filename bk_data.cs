@@ -105,41 +105,7 @@ namespace ClinicaCentral
 
         public Dictionary<string, string> GetDoctorDayAvailability(string doctorName, DateTime date)
         {
-            int weekday = ((int)date.DayOfWeek + 6) % 7;
-
-            var availability = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "Morning", "Off" },
-                { "Afternoon", "Off" }
-            };
-
-            using var conn = OpenConnection();
-            
-           
-            string query = @"SELECT sa.slot, sa.status
-                 FROM staff_availability sa
-                 JOIN users u ON u.username = sa.username
-                 JOIN staff s ON s.user_id = u.id
-                 WHERE s.full_name = @docName AND sa.weekday = @weekday";
-
-            using var cmd = new MySqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@docName", doctorName);
-            cmd.Parameters.AddWithValue("@weekday", weekday);
-
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                string slot = reader.GetString(0);
-                string status = reader.GetString(1);
-                if (availability.ContainsKey(slot))
-                {
-                    availability[slot] = status;
-                }
-            }
-
-            return availability;
-
-            
+            return new ScheduleRepository(Db).GetDoctorDayAvailability(doctorName, date);
         }
 
         public List<DoctorOption> GetDoctors()

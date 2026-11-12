@@ -332,6 +332,9 @@
                                                             <Setter Property="Background" Value="#FFF0C2"/>
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding Type}" Value="On Leave">
+                                                                    <Setter Property="Background" Value="#3A3A3A"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Type}" Value="Emergency">
                                                                     <Setter Property="Background" Value="#FDE2E2"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
@@ -343,6 +346,9 @@
                                                                 <Setter Property="Foreground" Value="#B7791F"/>
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding Type}" Value="On Leave">
+                                                                        <Setter Property="Foreground" Value="White"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Type}" Value="Emergency">
                                                                         <Setter Property="Foreground" Value="#D93025"/>
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
@@ -483,47 +489,55 @@
 
                         <TextBlock Text="Prescription" Style="{StaticResource CardTitle}" FontSize="17" Margin="0,14,0,0"/>
                         <StackPanel x:Name="PrescriptionFields">
-                            <Grid Margin="0,8,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                    <TextBlock Text="Medicine name (required)" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                    <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
-                                        <TextBox x:Name="MedicineInput" MaxLength="100" BorderThickness="0" Padding="2,6"/>
-                                    </Border>
-                                </StackPanel>
-                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                    <TextBlock Text="Dosage (required)" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                    <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
-                                        <TextBox x:Name="DosageInput" MaxLength="50" BorderThickness="0" Padding="2,6"/>
-                                    </Border>
-                                </StackPanel>
-                            </Grid>
-                            <Grid Margin="0,8,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                    <TextBlock Text="Frequency (required)" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                    <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
-                                        <TextBox x:Name="FrequencyInput" MaxLength="100" BorderThickness="0" Padding="2,6"/>
-                                    </Border>
-                                </StackPanel>
-                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                    <TextBlock Text="Duration (required)" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                    <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
-                                        <TextBox x:Name="DurationInput" MaxLength="50" BorderThickness="0" Padding="2,6"/>
-                                    </Border>
-                                </StackPanel>
-                            </Grid>
-                            <TextBlock Text="Prescription notes (optional)" FontSize="13" FontWeight="SemiBold" Margin="0,8,0,4"/>
-                            <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
-                                <TextBox x:Name="PrescriptionDescriptionInput" MinHeight="48"
-                                         AcceptsReturn="True" TextWrapping="Wrap" BorderThickness="0" Padding="2,6"/>
-                            </Border>
+                            <ItemsControl x:Name="PrescriptionRows">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5"
+                                                Padding="10" Margin="0,8,0,0">
+                                            <StackPanel>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                                        <TextBlock Text="Medicine name (required)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                                        <TextBox Text="{Binding MedicineName, UpdateSourceTrigger=PropertyChanged}" MaxLength="100" Padding="4"/>
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                                        <TextBlock Text="Dosage (required)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                                        <TextBox Text="{Binding Dosage, UpdateSourceTrigger=PropertyChanged}" MaxLength="50" Padding="4"/>
+                                                    </StackPanel>
+                                                    <Button Grid.Column="2" Content="Remove" Tag="{Binding}"
+                                                            Style="{StaticResource DeclineButton}" Margin="8,18,0,0"
+                                                            Padding="8,4" Click="RemovePrescription_Click"/>
+                                                </Grid>
+                                                <Grid Margin="0,8,0,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                                        <TextBlock Text="Frequency (required)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                                        <TextBox Text="{Binding Frequency, UpdateSourceTrigger=PropertyChanged}" MaxLength="100" Padding="4"/>
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                                        <TextBlock Text="Duration (required)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                                        <TextBox Text="{Binding Duration, UpdateSourceTrigger=PropertyChanged}" MaxLength="50" Padding="4"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                                <TextBlock Text="Description (optional)" FontSize="12" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                                                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                                         MinHeight="42" AcceptsReturn="True" TextWrapping="Wrap" Padding="4"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Button Content="+ Add Another Medicine" HorizontalAlignment="Left"
+                                    Style="{StaticResource AddButton}" Margin="0,10,0,0"
+                                    Click="AddPrescription_Click"/>
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
@@ -534,6 +548,54 @@
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="TimeOffOverlay" Grid.ColumnSpan="2" Panel.ZIndex="21" Visibility="Collapsed"
+              Background="#80000000">
+            <Border Style="{StaticResource SoftCard}" Width="500" Padding="24"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="Add Time Off" Style="{StaticResource CardTitle}" FontSize="23"/>
+                    <Grid Margin="0,14,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <TextBlock Text="Start date" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <DatePicker x:Name="TimeOffStartDate"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                            <TextBlock Text="End date" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <DatePicker x:Name="TimeOffEndDate"/>
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock Text="Time scope" FontWeight="SemiBold" Margin="0,12,0,5"/>
+                    <ComboBox x:Name="TimeOffScopeBox" SelectedIndex="2" Padding="6">
+                        <ComboBoxItem Content="AM"/>
+                        <ComboBoxItem Content="PM"/>
+                        <ComboBoxItem Content="Both"/>
+                    </ComboBox>
+                    <TextBlock Text="Reason type" FontWeight="SemiBold" Margin="0,12,0,5"/>
+                    <ComboBox x:Name="TimeOffTypeBox" SelectedIndex="0" Padding="6"
+                              SelectionChanged="TimeOffType_SelectionChanged">
+                        <ComboBoxItem Content="Busy"/>
+                        <ComboBoxItem Content="On Leave"/>
+                        <ComboBoxItem Content="Emergency"/>
+                    </ComboBox>
+                    <StackPanel x:Name="TimeOffDescriptionPanel">
+                        <TextBlock Text="Description" FontWeight="SemiBold" Margin="0,12,0,5"/>
+                        <TextBox x:Name="TimeOffDescriptionInput" MaxLength="500" MinHeight="64"
+                                 AcceptsReturn="True" TextWrapping="Wrap" Padding="6"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+                        <Button Content="Cancel" Width="100" Margin="0,0,8,0"
+                                Style="{StaticResource DeclineButton}" Click="CancelTimeOff_Click"/>
+                        <Button Content="Save Time Off" Width="130"
+                                Style="{StaticResource ActionButton}" Click="SaveTimeOff_Click"/>
+                    </StackPanel>
+                </StackPanel>
             </Border>
         </Grid>
     </Grid>

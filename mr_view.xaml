@@ -8,6 +8,7 @@
 
     <Window.Resources>
         <FontFamily x:Key="TitleFont">Poppins, Segoe UI Black</FontFamily>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
         <Style x:Key="SectionLabel" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
@@ -113,7 +114,7 @@
 
                     <StackPanel Grid.Column="1" HorizontalAlignment="Right">
                         <TextBlock Text="{Binding DateLabel}" FontSize="13" HorizontalAlignment="Right"/>
-                        <TextBlock Text="Recorded" FontSize="13" Foreground="#444"
+                        <TextBlock Text="{Binding DoctorText}" FontSize="13" Foreground="#444"
                                    HorizontalAlignment="Right" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Grid>
@@ -157,6 +158,34 @@
 
                 <TextBlock Text="Notes" Style="{StaticResource SectionLabel}"/>
                 <TextBlock Text="{Binding NotesText}" FontSize="15" TextWrapping="Wrap"/>
+
+                <StackPanel x:Name="PrescriptionSection">
+                    <TextBlock Text="Prescription" Style="{StaticResource SectionLabel}"/>
+                    <ItemsControl ItemsSource="{Binding Prescriptions}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#FAFAFA" BorderBrush="#D9E2F0" BorderThickness="1"
+                                        CornerRadius="4" Padding="10,8" Margin="0,0,0,6">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Medicine}" FontSize="15" FontWeight="SemiBold"/>
+                                        <TextBlock FontSize="13" Foreground="#555" Margin="0,3,0,0">
+                                            <Run Text="{Binding Dosage}"/>
+                                            <Run Text=" · "/>
+                                            <Run Text="{Binding Frequency}"/>
+                                            <Run Text=" · "/>
+                                            <Run Text="{Binding Duration}"/>
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding Description}" FontSize="13" Foreground="#666"
+                                                   TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="{Binding NoPrescriptionMessage}" FontSize="14" Foreground="#666"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding NoPrescriptions, Converter={StaticResource BoolToVis}}"/>
+                </StackPanel>
 
                 <TextBlock Text="Attachment" Style="{StaticResource SectionLabel}"/>
                 <Grid>

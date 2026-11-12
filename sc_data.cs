@@ -40,6 +40,17 @@ namespace ClinicaCentral
         public DateTime EndDate { get; set; }
         public string Reason { get; set; } = "";
         public string Type { get; set; } = "";
+        public string Scope { get; set; } = "Both";
+
+        public string TypeCategory
+        {
+            get { return Type; }
+        }
+
+        public string ScopeText
+        {
+            get { return Scope == "Both" ? "AM & PM" : Scope; }
+        }
 
         public string DateText
         {
@@ -58,7 +69,7 @@ namespace ClinicaCentral
 
         public string TypeText
         {
-            get { return Type.Length == 0 ? "Busy" : Type; }
+            get { return TypeCategory.Length == 0 ? "Busy" : TypeCategory + " · " + ScopeText; }
         }
     }
 
@@ -108,6 +119,7 @@ namespace ClinicaCentral
         public int PatientId { get; set; }
         public DateTime When { get; set; }
         public string Patient { get; set; } = "";
+        public string DoctorName { get; set; } = "";
 
         public string WhenText
         {
@@ -135,7 +147,7 @@ namespace ClinicaCentral
 
             using var conn = OpenConnection();
             using var cmd = new MySqlCommand(
-                @"SELECT a.id, a.patient_id, a.appointment_date, CONCAT(p.first_name, ' ', p.last_name)
+                @"SELECT a.id, a.patient_id, a.appointment_date, CONCAT(p.first_name, ' ', p.last_name), s.full_name
                 FROM appointments a
                 JOIN patients p ON p.id = a.patient_id
                 JOIN staff s ON s.id = a.staff_id
@@ -154,7 +166,8 @@ namespace ClinicaCentral
                     Id = Convert.ToInt32(reader.GetValue(0)),
                     PatientId = Convert.ToInt32(reader.GetValue(1)),
                     When = Convert.ToDateTime(reader.GetValue(2)),
-                    Patient = Convert.ToString(reader.GetValue(3)) ?? ""
+                    Patient = Convert.ToString(reader.GetValue(3)) ?? "",
+                    DoctorName = reader.IsDBNull(4) ? "" : Convert.ToString(reader.GetValue(4)) ?? ""
                 });
             }
             return list;
@@ -170,11 +183,12 @@ namespace ClinicaCentral
                 long medicalRecordId;
                 using (var cmd = new MySqlCommand(
                     @"INSERT INTO medical_records
-                        (patient_id, record_date, diagnosis, doctor, notes, bp, temperature, pulse, weight_kg, treatment)
+                        (appointment_id, patient_id, record_date, diagnosis, doctor, notes, bp, temperature, pulse, weight_kg, treatment)
                       VALUES
-                        (@patientId, CURDATE(), @diagnosis, @doctor, @notes, @bp, @temperature, @pulse, @weightKg, @treatment)",
+                        (@appointmentId, @patientId, CURDATE(), @diagnosis, @doctor, @notes, @bp, @temperature, @pulse, @weightKg, @treatment)",
                     conn, transaction))
                 {
+                    cmd.Parameters.AddWithValue("@appointmentId", completion.AppointmentId);
                     cmd.Parameters.AddWithValue("@patientId", completion.PatientId);
                     cmd.Parameters.AddWithValue("@diagnosis", completion.Diagnosis);
                     cmd.Parameters.AddWithValue("@doctor", completion.Doctor);
@@ -190,19 +204,31 @@ namespace ClinicaCentral
 
                 if (completion.NeedsPrescription)
                 {
-                    using var cmd = new MySqlCommand(
+                    if (completion.Prescriptions.Count == 0)
+                        throw new InvalidOperationException("At least one prescription is required.");
+
+                    foreach (PrescriptionInput prescription in completion.Prescriptions)
+                    {
+                        if (string.IsNullOrWhiteSpace(prescription.MedicineName) ||
+                            string.IsNullOrWhiteSpace(prescription.Dosage) ||
+                            string.IsNullOrWhiteSpace(prescription.Frequency) ||
+                            string.IsNullOrWhiteSpace(prescription.Duration))
+                            throw new InvalidOperationException("Prescription name, dosage, frequency, and duration are required.");
+
+                        using var cmd = new MySqlCommand(
                         @"INSERT INTO prescriptions
                             (id, medicine_name, dosage, frequency, duration, description)
                           VALUES
                             (@id, @medicineName, @dosage, @frequency, @duration, @description)",
-                        conn, transaction);
-                    cmd.Parameters.AddWithValue("@id", medicalRecordId);
-                    cmd.Parameters.AddWithValue("@medicineName", completion.MedicineName);
-                    cmd.Parameters.AddWithValue("@dosage", completion.Dosage);
-                    cmd.Parameters.AddWithValue("@frequency", completion.Frequency);
-                    cmd.Parameters.AddWithValue("@duration", completion.Duration);
-                    cmd.Parameters.AddWithValue("@description", DbValue(completion.Description));
-                    cmd.ExecuteNonQuery();
+                            conn, transaction);
+                        cmd.Parameters.AddWithValue("@id", medicalRecordId);
+                        cmd.Parameters.AddWithValue("@medicineName", prescription.MedicineName);
+                        cmd.Parameters.AddWithValue("@dosage", prescription.Dosage);
+                        cmd.Parameters.AddWithValue("@frequency", prescription.Frequency);
+                        cmd.Parameters.AddWithValue("@duration", prescription.Duration);
+                        cmd.Parameters.AddWithValue("@description", DbValue(prescription.Description));
+                        cmd.ExecuteNonQuery();
+                    }
                 }
 
                 using (var cmd = new MySqlCommand(
@@ -248,41 +274,6 @@ namespace ClinicaCentral
             cmd.ExecuteNonQuery();
         }
 
-        public Dictionary<string, string> GetDoctorDayAvailability(string doctorName, DateTime date)
-        {
-            int weekday = ((int)date.DayOfWeek + 6) % 7; 
-
-            var availability = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "Morning", "Off" },
-                { "Afternoon", "Off" }
-            };
-
-            using var conn = OpenConnection();
-            string query = @"SELECT sa.slot, sa.status
-                 FROM staff_availability sa
-                 JOIN users u ON u.username = sa.username
-                 JOIN staff s ON s.user_id = u.id
-                 WHERE s.full_name = @docName AND sa.weekday = @weekday";
-
-            using var cmd = new MySqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@docName", doctorName);
-            cmd.Parameters.AddWithValue("@weekday", weekday);
-
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                string slot = reader.GetString(0);
-                string status = reader.GetString(1);
-                if (availability.ContainsKey(slot))
-                {
-                    availability[slot] = status;
-                }
-            }
-
-            return availability;
-        }
-
         public WeeklyAvailability GetAvailability(string username)
         {
             var week = new WeeklyAvailability();
@@ -321,11 +312,98 @@ namespace ClinicaCentral
                     Id = Convert.ToInt32(reader.GetValue(0)),
                     StartDate = Convert.ToDateTime(reader.GetValue(1)),
                     EndDate = Convert.ToDateTime(reader.GetValue(2)),
-                    Reason = reader.IsDBNull(3) ? "" : Convert.ToString(reader.GetValue(3)) ?? "",
-                    Type = reader.IsDBNull(4) ? "" : Convert.ToString(reader.GetValue(4)) ?? ""
+                    Reason = ParseTimeOffReason(reader.IsDBNull(3) ? "" : Convert.ToString(reader.GetValue(3)) ?? "", out string scope),
+                    Type = reader.IsDBNull(4) ? "" : Convert.ToString(reader.GetValue(4)) ?? "",
+                    Scope = scope
                 });
             }
             return list;
+        }
+
+        public void AddTimeOff(string username, DateTime startDate, DateTime endDate, string type, string scope, string? reason)
+        {
+            using var conn = OpenConnection();
+            using var cmd = new MySqlCommand(
+                "INSERT INTO time_off (username, start_date, end_date, reason, type) " +
+                "VALUES (@username, @startDate, @endDate, @reason, @type)", conn);
+            cmd.Parameters.AddWithValue("@username", username);
+            cmd.Parameters.AddWithValue("@startDate", startDate.Date);
+            cmd.Parameters.AddWithValue("@endDate", endDate.Date);
+            cmd.Parameters.AddWithValue("@reason", "[" + scope + "] " + (reason ?? ""));
+            cmd.Parameters.AddWithValue("@type", type);
+            cmd.ExecuteNonQuery();
+        }
+
+        private static string ParseTimeOffReason(string storedReason, out string scope)
+        {
+            scope = "Both";
+            foreach (string value in new[] { "AM", "PM", "Both" })
+            {
+                string prefix = "[" + value + "]";
+                if (!storedReason.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                scope = value;
+                return storedReason.Substring(prefix.Length).Trim();
+            }
+
+            return storedReason;
+        }
+
+        public Dictionary<string, string> GetDoctorDayAvailability(string doctorName, DateTime date)
+        {
+            int weekday = ((int)date.DayOfWeek + 6) % 7;
+
+            var availability = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Morning", "Off" },
+                { "Afternoon", "Off" }
+            };
+
+            using var conn = OpenConnection();
+            using (var cmd = new MySqlCommand(
+                @"SELECT sa.slot, sa.status
+                  FROM staff_availability sa
+                  JOIN users u ON u.username = sa.username
+                  JOIN staff s ON s.user_id = u.id
+                  WHERE s.full_name = @docName AND sa.weekday = @weekday", conn))
+            {
+                cmd.Parameters.AddWithValue("@docName", doctorName);
+                cmd.Parameters.AddWithValue("@weekday", weekday);
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    string slot = Convert.ToString(reader.GetValue(0)) ?? "";
+                    string status = Convert.ToString(reader.GetValue(1)) ?? "Off";
+                    if (availability.ContainsKey(slot))
+                        availability[slot] = status;
+                }
+            }
+
+            using (var cmd = new MySqlCommand(
+                @"SELECT t.reason
+                  FROM time_off t
+                  JOIN users u ON u.username = t.username
+                  JOIN staff s ON s.user_id = u.id
+                  WHERE s.full_name = @docName
+                    AND t.start_date <= @date
+                    AND t.end_date >= @date", conn))
+            {
+                cmd.Parameters.AddWithValue("@docName", doctorName);
+                cmd.Parameters.AddWithValue("@date", date.Date);
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    string reason = reader.IsDBNull(0) ? "" : Convert.ToString(reader.GetValue(0)) ?? "";
+                    ParseTimeOffReason(reason, out string scope);
+                    if (scope == "AM" || scope == "Both")
+                        availability["Morning"] = "Off";
+                    if (scope == "PM" || scope == "Both")
+                        availability["Afternoon"] = "Off";
+                }
+            }
+
+            return availability;
         }
 
         public List<BookingRequestRow> GetBookingRequests()
@@ -411,6 +489,11 @@ namespace ClinicaCentral
         public decimal? WeightKg { get; set; }
         public string? Treatment { get; set; }
         public bool NeedsPrescription { get; set; }
+        public List<PrescriptionInput> Prescriptions { get; set; } = new List<PrescriptionInput>();
+    }
+
+    public sealed class PrescriptionInput
+    {
         public string MedicineName { get; set; } = "";
         public string Dosage { get; set; } = "";
         public string Frequency { get; set; } = "";

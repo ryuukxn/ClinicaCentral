@@ -9,7 +9,6 @@ namespace ClinicaCentral
     {
         private readonly PatientUser _user;
         private readonly MyAppointmentsRepository _repo;
-        private readonly VisitRepository _visits;
         private List<MyAppointmentRow> _rows = new List<MyAppointmentRow>();
 
         public my_patient(PatientUser user)
@@ -19,7 +18,6 @@ namespace ClinicaCentral
             _user = user;
             DatabaseConnection db = new DatabaseConnection();
             _repo = new MyAppointmentsRepository(db);
-            _visits = new VisitRepository(db);
 
             WelcomeText.Text = $"Welcome back, {user.Username}!";
             Loaded += (s, e) => LoadAppointments(db);
@@ -65,20 +63,28 @@ namespace ClinicaCentral
             MyAppointmentRow? row = _rows.Find(r => r.Id == id);
             if (row == null) return;
 
-            VisitSummary summary;
+            MedicalRecordRow? record;
             try
             {
-                summary = _visits.GetSummary(row, _user.PatientId);
+                record = _repo.GetCompletedMedicalRecord(row.Id, _user.PatientId);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "The visit summary could not be loaded. Make sure visit_summary.sql was run.\n\n" + ex.Message,
+                    "The medical record for this appointment could not be loaded.\n\n" + ex.Message,
                     "Connection problem", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            visit_view window = new visit_view(summary);
+            if (record == null)
+            {
+                MessageBox.Show(
+                    "No medical record was found for this completed appointment.",
+                    "Medical record unavailable", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            mr_view window = new mr_view(record, true);
             window.Owner = this;
             window.ShowDialog();
         }

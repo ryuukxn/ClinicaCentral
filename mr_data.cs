@@ -24,6 +24,28 @@ namespace ClinicaCentral
         public decimal? WeightKg { get; set; }
         public string AttachmentImage { get; set; } = "";
         public string AttachmentPdf { get; set; } = "";
+        public List<PrescriptionLine> Prescriptions { get; } = new List<PrescriptionLine>();
+
+        public bool HasPrescriptions
+        {
+            get { return Prescriptions.Count > 0; }
+        }
+
+        public bool NoPrescriptions
+        {
+            get { return Prescriptions.Count == 0; }
+        }
+
+        public string NoPrescriptionMessage
+        {
+            get
+            {
+                return string.Equals(Diagnosis, "Normal / Healthy", StringComparison.OrdinalIgnoreCase) ||
+                       string.Equals(Diagnosis, "Normal", StringComparison.OrdinalIgnoreCase)
+                    ? "No prescription issued (Normal / Healthy check-up)"
+                    : "No prescription was issued for this check-up.";
+            }
+        }
 
         public string PatientCode
         {
@@ -214,10 +236,13 @@ namespace ClinicaCentral
             using var conn = OpenConnection();
             using var cmd = new MySqlCommand(
                 "SELECT m.id, m.patient_id, m.record_date, CONCAT(p.first_name, ' ', p.last_name), " +
-                "m.diagnosis, m.doctor, m.notes, " +
+                "m.diagnosis, COALESCE(staff_name.full_name, staff_user.full_name, m.doctor), m.notes, " +
                 "p.birthdate, m.bp, m.temperature, m.pulse, m.weight_kg, " +
                 "m.treatment, m.attachment_image, m.attachment_pdf " +
-                "FROM medical_records m JOIN patients p ON p.id = m.patient_id " + where +
+                "FROM medical_records m JOIN patients p ON p.id = m.patient_id " +
+                "LEFT JOIN staff staff_name ON staff_name.full_name = m.doctor " +
+                "LEFT JOIN users u ON u.username = m.doctor " +
+                "LEFT JOIN staff staff_user ON staff_user.user_id = u.id " + where +
                 "ORDER BY m.record_date DESC, m.id DESC", conn);
             if (patientId.HasValue) cmd.Parameters.AddWithValue("@pid", patientId.Value);
             if (doctorName != null) cmd.Parameters.AddWithValue("@doctor", doctorName);

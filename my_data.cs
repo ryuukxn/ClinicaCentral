@@ -36,14 +36,14 @@ namespace ClinicaCentral
         {
             get
             {
-                bool open = HasStatus("Pending") || HasStatus("Confirmed") || HasStatus("Scheduled");
+                bool open = HasStatus("Pending") || HasStatus("Scheduled");
                 return open && When > DateTime.Now;
             }
         }
 
         public bool ShowView
         {
-            get { return !CanCancel; }
+            get { return HasStatus("Completed"); }
         }
     }
 
@@ -57,8 +57,9 @@ namespace ClinicaCentral
 
             using var conn = OpenConnection();
             using var cmd = new MySqlCommand(
-                "SELECT id, appointment_date, doctor, status FROM appointments " +
-                "WHERE patient_id = @id ORDER BY appointment_date DESC", conn);
+                "SELECT a.id, a.appointment_date, COALESCE(s.full_name, a.doctor), a.status " +
+                "FROM appointments a LEFT JOIN staff s ON s.id = a.staff_id " +
+                "WHERE a.patient_id = @id ORDER BY a.appointment_date DESC", conn);
             cmd.Parameters.AddWithValue("@id", patientId);
 
             using var reader = cmd.ExecuteReader();
@@ -73,6 +74,92 @@ namespace ClinicaCentral
                 });
             }
             return list;
+        }
+
+        public MedicalRecordRow? GetCompletedMedicalRecord(int appointmentId, int patientId)
+        {
+            using var conn = OpenConnection();
+            using var cmd = new MySqlCommand(
+                @"SELECT mr.id, mr.patient_id, mr.record_date, CONCAT(p.first_name, ' ', p.last_name),
+                         mr.diagnosis, COALESCE(s.full_name, mr.doctor), mr.notes, p.birthdate, mr.bp, mr.temperature,
+                         mr.pulse, mr.weight_kg, mr.treatment, mr.attachment_image, mr.attachment_pdf,
+                         pr.prescription_id, pr.medicine_name, pr.dosage, pr.frequency, pr.duration, pr.description
+                  FROM appointments a
+                  JOIN patients p ON p.id = a.patient_id
+                  LEFT JOIN staff s ON s.id = a.staff_id
+                  LEFT JOIN users u ON u.id = s.user_id
+                  JOIN medical_records mr
+                    ON mr.patient_id = a.patient_id
+                   AND (
+                      mr.appointment_id = a.id
+                      OR (
+                          mr.appointment_id IS NULL
+                          AND mr.record_date = DATE(a.appointment_date)
+                          AND (mr.doctor = a.doctor OR mr.doctor = u.username OR mr.doctor = s.full_name)
+                      )
+                   )
+                   AND mr.id = (
+                      SELECT mr2.id
+                      FROM medical_records mr2
+                      WHERE mr2.patient_id = a.patient_id
+                        AND (
+                            mr2.appointment_id = a.id
+                            OR (
+                                mr2.appointment_id IS NULL
+                                AND mr2.record_date = DATE(a.appointment_date)
+                                AND (mr2.doctor = a.doctor OR mr2.doctor = u.username OR mr2.doctor = s.full_name)
+                            )
+                        )
+                      ORDER BY mr2.id DESC
+                      LIMIT 1
+                   )
+                  LEFT JOIN prescriptions pr ON pr.id = mr.id
+                  WHERE a.id = @appointmentId
+                   AND a.patient_id = @patientId
+                   AND a.status = 'Completed'
+                  ORDER BY pr.prescription_id", conn);
+            cmd.Parameters.AddWithValue("@appointmentId", appointmentId);
+            cmd.Parameters.AddWithValue("@patientId", patientId);
+
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read()) return null;
+
+            MedicalRecordRow record = new MedicalRecordRow
+            {
+                Id = Convert.ToInt32(reader.GetValue(0)),
+                PatientId = Convert.ToInt32(reader.GetValue(1)),
+                RecordDate = Convert.ToDateTime(reader.GetValue(2)),
+                PatientName = Convert.ToString(reader.GetValue(3)) ?? "",
+                Diagnosis = reader.IsDBNull(4) ? "" : Convert.ToString(reader.GetValue(4)) ?? "",
+                Doctor = reader.IsDBNull(5) ? "" : Convert.ToString(reader.GetValue(5)) ?? "",
+                Notes = reader.IsDBNull(6) ? "" : Convert.ToString(reader.GetValue(6)) ?? "",
+                BirthDate = reader.IsDBNull(7) ? (DateTime?)null : Convert.ToDateTime(reader.GetValue(7)),
+                Bp = reader.IsDBNull(8) ? "" : Convert.ToString(reader.GetValue(8)) ?? "",
+                Temperature = reader.IsDBNull(9) ? (decimal?)null : Convert.ToDecimal(reader.GetValue(9)),
+                Pulse = reader.IsDBNull(10) ? (int?)null : Convert.ToInt32(reader.GetValue(10)),
+                WeightKg = reader.IsDBNull(11) ? (decimal?)null : Convert.ToDecimal(reader.GetValue(11)),
+                Treatment = reader.IsDBNull(12) ? "" : Convert.ToString(reader.GetValue(12)) ?? "",
+                AttachmentImage = reader.IsDBNull(13) ? "" : Convert.ToString(reader.GetValue(13)) ?? "",
+                AttachmentPdf = reader.IsDBNull(14) ? "" : Convert.ToString(reader.GetValue(14)) ?? ""
+            };
+
+            do
+            {
+                if (!reader.IsDBNull(15))
+                {
+                    record.Prescriptions.Add(new PrescriptionLine
+                    {
+                        Medicine = Convert.ToString(reader.GetValue(16)) ?? "",
+                        Dosage = reader.IsDBNull(17) ? "" : Convert.ToString(reader.GetValue(17)) ?? "",
+                        Frequency = reader.IsDBNull(18) ? "" : Convert.ToString(reader.GetValue(18)) ?? "",
+                        Duration = reader.IsDBNull(19) ? "" : Convert.ToString(reader.GetValue(19)) ?? "",
+                        Description = reader.IsDBNull(20) ? "" : Convert.ToString(reader.GetValue(20)) ?? ""
+                    });
+                }
+            }
+            while (reader.Read());
+
+            return record;
         }
     }
 }
