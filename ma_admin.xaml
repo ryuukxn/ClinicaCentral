@@ -178,11 +178,14 @@
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
+                <DataTrigger Binding="{Binding UserRole}" Value="Admin">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
                 <DataTrigger Binding="{Binding Status}" Value="Inactive">
-                    <Setter Property="Content" Value="Activate"/>
-                    <Setter Property="Background" Value="#1F4FD8"/>
-                    <Setter Property="BorderBrush" Value="#1F4FD8"/>
-                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Content" Value="Reactivate"/>
+                    <Setter Property="Background" Value="#DFF5E6"/>
+                    <Setter Property="BorderBrush" Value="#1E8E4E"/>
+                    <Setter Property="Foreground" Value="#1E8E4E"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -338,47 +341,146 @@
 
                     <Border x:Name="AddAccountPanel" Grid.Row="1" Visibility="Collapsed"
                             Background="#EDEDED" CornerRadius="6" Padding="16" Margin="0,16,0,0">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="1.2*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="1.6*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Full name" Style="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="NameBox" Grid.Row="1" Grid.Column="0" Style="{StaticResource FieldBox}"/>
-
-                            <TextBlock Grid.Row="0" Grid.Column="2" Text="Role" Style="{StaticResource FieldLabel}"/>
-                            <ComboBox x:Name="RoleBox" Grid.Row="1" Grid.Column="2" Height="38" FontSize="14"
-                                      VerticalContentAlignment="Center" SelectedIndex="0">
-                                <ComboBoxItem Content="Doctor"/>
+                        <StackPanel>
+                            <TextBlock x:Name="AccountPanelTitle" Text="Add Account" FontSize="18"
+                                       FontWeight="Bold" Margin="0,0,0,10"/>
+                            <TextBlock Text="Account type" Style="{StaticResource FieldLabel}"/>
+                            <ComboBox x:Name="RoleBox" Height="38" FontSize="14" Margin="0,0,0,12"
+                                      VerticalContentAlignment="Center" SelectionChanged="AccountRole_SelectionChanged">
+                                <ComboBoxItem Content="Staff"/>
                                 <ComboBoxItem Content="Patient"/>
                             </ComboBox>
 
-                            <TextBlock Grid.Row="0" Grid.Column="4" Text="Email" Style="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="EmailBox" Grid.Row="1" Grid.Column="4" Style="{StaticResource FieldBox}"/>
+                            <ScrollViewer MaxHeight="330" VerticalScrollBarVisibility="Auto">
+                                <StackPanel x:Name="AccountFormFields" Visibility="Collapsed">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Username" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox x:Name="UsernameBox" Style="{StaticResource FieldBox}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Email" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox x:Name="EmailBox" Style="{StaticResource FieldBox}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Password (leave blank when editing to keep unchanged)"
+                                                       Style="{StaticResource FieldLabel}"/>
+                                            <PasswordBox x:Name="PasswordBox" Style="{StaticResource FieldPassword}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Confirm Password" Style="{StaticResource FieldLabel}"/>
+                                            <PasswordBox x:Name="ConfirmPasswordBox" Style="{StaticResource FieldPassword}"/>
+                                        </StackPanel>
+                                    </Grid>
 
-                            <TextBlock Grid.Row="0" Grid.Column="6" Text="Password" Style="{StaticResource FieldLabel}"/>
-                            <PasswordBox x:Name="PasswordBox" Grid.Row="1" Grid.Column="6"
-                                         Style="{StaticResource FieldPassword}"/>
+                                    <StackPanel x:Name="StaffFields" Visibility="Collapsed">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="16"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Full Name" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox x:Name="StaffFullNameBox" Style="{StaticResource FieldBox}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Position" Style="{StaticResource FieldLabel}"/>
+                                                <ComboBox x:Name="StaffPositionBox" Height="38" FontSize="14"
+                                                          VerticalContentAlignment="Center">
+                                                    <ComboBoxItem Content="Doctor"/>
+                                                    <ComboBoxItem Content="Nurse"/>
+                                                    <ComboBoxItem Content="Staff"/>
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Text="Contact" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="StaffContactBox" Style="{StaticResource FieldBox}"/>
+                                    </StackPanel>
 
-                            <StackPanel Grid.Row="2" Grid.ColumnSpan="7" Orientation="Horizontal"
-                                        HorizontalAlignment="Right" Margin="0,14,0,0">
+                                    <StackPanel x:Name="PatientFields" Visibility="Collapsed">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="16"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="First Name" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox x:Name="PatientFirstNameBox" Style="{StaticResource FieldBox}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Last Name" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox x:Name="PatientLastNameBox" Style="{StaticResource FieldBox}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="16"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Birthdate (optional)" Style="{StaticResource FieldLabel}"/>
+                                                <DatePicker x:Name="PatientBirthDatePicker" Height="38"
+                                                            VerticalContentAlignment="Center"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Gender" Style="{StaticResource FieldLabel}"/>
+                                                <ComboBox x:Name="PatientGenderBox" Height="38" FontSize="14"
+                                                          VerticalContentAlignment="Center">
+                                                    <ComboBoxItem Content="Female"/>
+                                                    <ComboBoxItem Content="Male"/>
+                                                    <ComboBoxItem Content="Other"/>
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="16"/>
+                                                <ColumnDefinition Width="2*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Contact" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox x:Name="PatientContactBox" Style="{StaticResource FieldBox}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Address" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox x:Name="PatientAddressBox" Style="{StaticResource FieldBox}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Text="Allergies (optional)" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="PatientAllergiesBox" Style="{StaticResource FieldBox}"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                            <Button Content="Choose Photo" Style="{StaticResource SecondaryButton}"
+                                                    Padding="12,6" Click="PatientPhoto_Click"/>
+                                            <TextBlock x:Name="PatientPhotoText" Text="Optional"
+                                                       VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
                                 <Button Content="Cancel" Style="{StaticResource SecondaryButton}"
                                         Margin="0,0,10,0" Click="CancelAdd_Click"/>
-                                <Button Content="Save Account" Style="{StaticResource PrimaryButton}"
+                                <Button x:Name="SaveAccountButton" Content="Save Account" Style="{StaticResource PrimaryButton}"
                                         FontSize="14" Click="SaveAccount_Click"/>
                             </StackPanel>
-                        </Grid>
+                        </StackPanel>
                     </Border>
 
                     <Grid Grid.Row="2" Margin="0,16,0,0">

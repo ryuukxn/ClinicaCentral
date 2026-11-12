@@ -32,16 +32,17 @@ using MySqlConnector;
                 return false;
             }
         }
-        public static bool Authenticate(string login, string password, out string username, out string role)
+        public static bool Authenticate(string login, string password, out string username, out string role, out bool deactivated)
         {
             username = "";
             role = "";
+            deactivated = false;
 
             using var conn = GetConnection();
             conn.Open();
 
             using var cmd = new MySqlCommand(
-                "SELECT username, password_hash, role FROM users WHERE username = @l OR email = @l LIMIT 1", conn);
+                "SELECT username, password_hash, role, status FROM users WHERE username = @l OR email = @l LIMIT 1", conn);
             cmd.Parameters.AddWithValue("@l", login);
 
             using var reader = cmd.ExecuteReader();
@@ -52,7 +53,27 @@ using MySqlConnector;
 
             username = reader.GetString(0);
             role = reader.GetString(2);
+            deactivated = !string.Equals(reader.IsDBNull(3) ? "" : reader.GetString(3),
+                "Active", StringComparison.OrdinalIgnoreCase);
+            if (deactivated)
+            {
+                username = "";
+                role = "";
+                return false;
+            }
             return true;
+        }
+
+        public static bool IsAccountActive(string username)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new MySqlCommand(
+                "SELECT status FROM users WHERE username = @username LIMIT 1", conn);
+            cmd.Parameters.AddWithValue("@username", username);
+            object? result = cmd.ExecuteScalar();
+            return result != null && result is not DBNull &&
+                string.Equals(Convert.ToString(result), "Active", StringComparison.OrdinalIgnoreCase);
         }
 
 

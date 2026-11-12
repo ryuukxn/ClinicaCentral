@@ -1,7 +1,10 @@
 using System;
 using System.Linq;
+using System.Net.Mail;
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.Win32;
+using MySqlConnector;
 
 namespace ClinicaCentral
 {
@@ -9,6 +12,10 @@ namespace ClinicaCentral
     {
         private readonly User _user;
         private readonly UserAccountRepository _accounts;
+        private List<UserAccountRow> _allAccounts = new();
+        private UserAccountRow? _editingAccount;
+        private byte[]? _selectedPatientPhoto;
+        private bool _changingRole;
         private string _activeFilter = "All";
 
         public ma_admin(User user)
@@ -39,11 +46,13 @@ namespace ClinicaCentral
         {
             try
             {
-                var accounts = _accounts.GetAccounts();
+                _allAccounts = _accounts.GetAccounts();
+                UpdateFilterCounts();
+                var accounts = _allAccounts;
 
                 if (_activeFilter != "All")
                     accounts = accounts
-                        .Where(x => x.Role.Equals(_activeFilter, StringComparison.OrdinalIgnoreCase))
+                        .Where(x => _activeFilter == "Doctor" ? x.IsDoctor : x.IsPatient)
                         .ToList();
 
                 string search = SearchBox.Text.Trim();
@@ -52,13 +61,12 @@ namespace ClinicaCentral
                 {
                     accounts = accounts.Where(x =>
                         x.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                        x.Role.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                        x.Username.Contains(search, StringComparison.OrdinalIgnoreCase) ||
                         x.Email.Contains(search, StringComparison.OrdinalIgnoreCase))
                         .ToList();
                 }
 
                 AccountList.ItemsSource = accounts;
-                UpdateFilterCounts();
             }
             catch (Exception ex)
             {
@@ -72,19 +80,9 @@ namespace ClinicaCentral
 
         private void UpdateFilterCounts()
         {
-            try
-            {
-                var all = _accounts.GetAccounts();
-
-                AllFilter.Content = $"All {all.Count}";
-                DoctorFilter.Content =
-                    $"Doctor {all.Count(x => x.Role.Equals("Doctor", StringComparison.OrdinalIgnoreCase))}";
-                PatientFilter.Content =
-                    $"Patient {all.Count(x => x.Role.Equals("Patient", StringComparison.OrdinalIgnoreCase))}";
-            }
-            catch
-            {
-            }
+            AllFilter.Content = $"All {_allAccounts.Count}";
+            DoctorFilter.Content = $"Doctor {_allAccounts.Count(x => x.IsDoctor)}";
+            PatientFilter.Content = $"Patient {_allAccounts.Count(x => x.IsPatient)}";
         }
 
         private void Filter_Click(object sender, RoutedEventArgs e)
@@ -110,31 +108,314 @@ namespace ClinicaCentral
 
         private void AddAccount_Click(object sender, RoutedEventArgs e)
         {
-            AddAccountPanel.Visibility =
-                AddAccountPanel.Visibility == Visibility.Visible
-                    ? Visibility.Collapsed
-                    : Visibility.Visible;
+            ResetAccountForm();
+            AccountPanelTitle.Text = "Add Account";
+            SaveAccountButton.Content = "Save Account";
+            AddAccountPanel.Visibility = Visibility.Visible;
         }
 
         private void CancelAdd_Click(object sender, RoutedEventArgs e)
         {
-            NameBox.Clear();
-            EmailBox.Clear();
-            PasswordBox.Clear();
-            RoleBox.SelectedIndex = 0;
-            AddAccountPanel.Visibility = Visibility.Collapsed;
+            ResetAccountForm();
+        }
+
+        private void AccountRole_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_changingRole) return;
+
+            string role = (RoleBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
+            AccountFormFields.Visibility = role.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+            StaffFields.Visibility = role == "Staff" ? Visibility.Visible : Visibility.Collapsed;
+            PatientFields.Visibility = role == "Patient" ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void SaveAccount_Click(object sender, RoutedEventArgs e)
         {
+            string username = UsernameBox.Text.Trim();
+            string email = EmailBox.Text.Trim();
+            string password = PasswordBox.Password;
+            string confirmPassword = ConfirmPasswordBox.Password;
+            string role = _editingAccount?.UserRole ??
+                (RoleBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
+
+            if (role.Length == 0)
+            {
+                WarnAccount("Choose whether this account is for Staff or a Patient.");
+                RoleBox.Focus();
+                return;
+            }
+
+            if (username.Length is < 3 or > 50 || username.Contains(' '))
+            {
+                WarnAccount("Username must be 3-50 characters with no spaces.");
+                UsernameBox.Focus();
+                return;
+            }
+
+            if (!IsValidEmail(email) || email.Length > 100)
+            {
+                WarnAccount("Enter a valid email address (maximum 100 characters).");
+                EmailBox.Focus();
+                return;
+            }
+
+            if (_editingAccount == null && password.Length < 8)
+            {
+                WarnAccount("Password must be at least 8 characters.");
+                PasswordBox.Focus();
+                return;
+            }
+
+            if (password.Length > 0 &&
+                (password.Length < 8 || password != confirmPassword))
+            {
+                WarnAccount(password.Length < 8
+                    ? "Password must be at least 8 characters."
+                    : "Password and confirmation do not match.");
+                PasswordBox.Focus();
+                return;
+            }
+
+            if (_editingAccount == null && password != confirmPassword)
+            {
+                WarnAccount("Password and confirmation do not match.");
+                ConfirmPasswordBox.Focus();
+                return;
+            }
+
+            UserAccountRow account = new UserAccountRow
+            {
+                Id = _editingAccount?.Id ?? 0,
+                Username = username,
+                Name = username,
+                UserRole = role,
+                Role = role,
+                Email = email,
+                Status = _editingAccount?.Status ?? "Active",
+                Position = GetSelectedContent(StaffPositionBox),
+                StaffFullName = StaffFullNameBox.Text.Trim(),
+                StaffContact = StaffContactBox.Text.Trim(),
+                FirstName = PatientFirstNameBox.Text.Trim(),
+                LastName = PatientLastNameBox.Text.Trim(),
+                BirthDate = PatientBirthDatePicker.SelectedDate,
+                Gender = GetSelectedContent(PatientGenderBox),
+                Contact = PatientContactBox.Text.Trim(),
+                Address = PatientAddressBox.Text.Trim(),
+                Allergies = PatientAllergiesBox.Text.Trim()
+            };
+
+            if (role == "Staff" &&
+                (string.IsNullOrWhiteSpace(account.StaffFullName) ||
+                 string.IsNullOrWhiteSpace(account.Position)))
+            {
+                WarnAccount("Full name and position are required for staff accounts.");
+                return;
+            }
+
+            if (role == "Patient" &&
+                (string.IsNullOrWhiteSpace(account.FirstName) ||
+                 string.IsNullOrWhiteSpace(account.LastName) ||
+                 string.IsNullOrWhiteSpace(account.Gender) ||
+                 string.IsNullOrWhiteSpace(account.Contact) ||
+                 string.IsNullOrWhiteSpace(account.Address)))
+            {
+                WarnAccount("First name, last name, gender, contact, and address are required for patient accounts.");
+                return;
+            }
+
+            if (account.StaffFullName.Length > 100 || account.StaffContact.Length > 20 ||
+                account.FirstName.Length > 50 || account.LastName.Length > 50 ||
+                account.Contact.Length > 30 || account.Address.Length > 200 ||
+                account.Allergies.Length > 255)
+            {
+                WarnAccount("One or more profile fields exceed the maximum length allowed.");
+                return;
+            }
+
+            try
+            {
+                bool isEditing = _editingAccount != null;
+                bool isCurrentAdmin = isEditing &&
+                    string.Equals(_editingAccount!.Username, _user.Username, StringComparison.OrdinalIgnoreCase);
+                string previousUsername = _user.Username;
+                if (!isEditing)
+                    _accounts.CreateAccount(account, password, _selectedPatientPhoto);
+                else
+                    _accounts.UpdateAccount(account, password, _selectedPatientPhoto);
+
+                if (isCurrentAdmin && !string.Equals(previousUsername, account.Username, StringComparison.OrdinalIgnoreCase))
+                {
+                    _user.UpdateUsername(account.Username);
+                    UserSessionMonitor.UpdateUsername(previousUsername, account.Username);
+                }
+
+                ResetAccountForm();
+                RefreshAccounts();
+                MessageBox.Show(isEditing ? "Account updated successfully." : "Account created successfully.",
+                    "Manage Account", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (MySqlException ex) when (ex.Number == 1062)
+            {
+                MessageBox.Show("Username/Email already exists.", "Manage Account",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("The account could not be saved.\n\n" + ex.Message,
+                    "Manage Account", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void Edit_Click(object sender, RoutedEventArgs e)
         {
+            if (!(sender is Button button) || !(button.Tag is UserAccountRow account)) return;
+
+            _editingAccount = account;
+            _selectedPatientPhoto = null;
+            AccountPanelTitle.Text = "Edit Account";
+            SaveAccountButton.Content = "Save Changes";
+
+            _changingRole = true;
+            if (account.UserRole == "Staff")
+            {
+                RoleBox.SelectedIndex = 0;
+                RoleBox.IsEnabled = false;
+                StaffFields.Visibility = Visibility.Visible;
+                PatientFields.Visibility = Visibility.Collapsed;
+            }
+            else if (account.UserRole == "Patient")
+            {
+                RoleBox.SelectedIndex = 1;
+                RoleBox.IsEnabled = false;
+                StaffFields.Visibility = Visibility.Collapsed;
+                PatientFields.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                RoleBox.SelectedIndex = -1;
+                RoleBox.IsEnabled = false;
+                StaffFields.Visibility = Visibility.Collapsed;
+                PatientFields.Visibility = Visibility.Collapsed;
+            }
+            _changingRole = false;
+            AccountFormFields.Visibility = Visibility.Visible;
+
+            UsernameBox.Text = account.Username;
+            EmailBox.Text = account.Email;
+            PasswordBox.Clear();
+            ConfirmPasswordBox.Clear();
+            StaffFullNameBox.Text = account.StaffFullName;
+            SelectContent(StaffPositionBox, account.Position);
+            StaffContactBox.Text = account.StaffContact;
+            PatientFirstNameBox.Text = account.FirstName;
+            PatientLastNameBox.Text = account.LastName;
+            PatientBirthDatePicker.SelectedDate = account.BirthDate;
+            SelectContent(PatientGenderBox, account.Gender);
+            PatientContactBox.Text = account.Contact;
+            PatientAddressBox.Text = account.Address;
+            PatientAllergiesBox.Text = account.Allergies;
+            PatientPhotoText.Text = account.Photo == null ? "No photo selected" : "Current photo will be kept";
+            AddAccountPanel.Visibility = Visibility.Visible;
         }
 
         private void ToggleStatus_Click(object sender, RoutedEventArgs e)
         {
+            if (!(sender is Button button) || !(button.Tag is UserAccountRow account)) return;
+
+            string newStatus = account.Status.Equals("Active", StringComparison.OrdinalIgnoreCase)
+                ? "Inactive" : "Active";
+            string action = newStatus == "Inactive" ? "deactivate" : "reactivate";
+            if (MessageBox.Show($"Are you sure you want to {action} {account.Name}'s account?",
+                    "Confirm account status", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                _accounts.SetStatus(account.Id, newStatus, _user.Username);
+                RefreshAccounts();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Manage Account",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void PatientPhoto_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog
+            {
+                Title = "Choose a patient photo",
+                Filter = "Pictures (*.jpg;*.jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp",
+                CheckFileExists = true
+            };
+            if (dialog.ShowDialog(this) != true) return;
+
+            try
+            {
+                _selectedPatientPhoto = PhotoStore.Prepare(dialog.FileName);
+                PatientPhotoText.Text = System.IO.Path.GetFileName(dialog.FileName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("The selected photo could not be loaded.\n\n" + ex.Message,
+                    "Patient Photo", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void ResetAccountForm()
+        {
+            _editingAccount = null;
+            _selectedPatientPhoto = null;
+            _changingRole = true;
+            RoleBox.SelectedIndex = -1;
+            RoleBox.IsEnabled = true;
+            _changingRole = false;
+            AccountFormFields.Visibility = Visibility.Collapsed;
+            StaffFields.Visibility = Visibility.Collapsed;
+            PatientFields.Visibility = Visibility.Collapsed;
+            UsernameBox.Clear();
+            EmailBox.Clear();
+            PasswordBox.Clear();
+            ConfirmPasswordBox.Clear();
+            StaffFullNameBox.Clear();
+            StaffPositionBox.SelectedIndex = -1;
+            StaffContactBox.Clear();
+            PatientFirstNameBox.Clear();
+            PatientLastNameBox.Clear();
+            PatientBirthDatePicker.SelectedDate = null;
+            PatientGenderBox.SelectedIndex = -1;
+            PatientContactBox.Clear();
+            PatientAddressBox.Clear();
+            PatientAllergiesBox.Clear();
+            PatientPhotoText.Text = "Optional";
+            AccountPanelTitle.Text = "Add Account";
+            SaveAccountButton.Content = "Save Account";
+            AddAccountPanel.Visibility = Visibility.Collapsed;
+        }
+
+        private static string GetSelectedContent(ComboBox comboBox)
+        {
+            return (comboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
+        }
+
+        private static void SelectContent(ComboBox comboBox, string content)
+        {
+            comboBox.SelectedItem = comboBox.Items
+                .OfType<ComboBoxItem>()
+                .FirstOrDefault(item => string.Equals(
+                    item.Content?.ToString(), content, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static bool IsValidEmail(string email)
+        {
+            try { return new MailAddress(email).Address == email; }
+            catch (FormatException) { return false; }
+        }
+
+        private static void WarnAccount(string message)
+        {
+            MessageBox.Show(message, "Manage Account", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
         private void Dashboard_Click(object sender, RoutedEventArgs e)

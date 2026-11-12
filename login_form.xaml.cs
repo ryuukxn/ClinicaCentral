@@ -47,14 +47,24 @@ namespace ClinicaCentral
 
             try
             {
-                User? user = _users.Login(login, pass);
+                User? user = _users.Login(login, pass, out bool deactivated);
 
                 if (user == null)
                 {
+                    if (deactivated)
+                    {
+                        MessageBox.Show(
+                            "Your account is deactivated. Please contact the administrator.",
+                            "Login", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
                     MessageBox.Show("Invalid username or password.", "Login",
                         MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
+
+                UserSessionMonitor.Start(user.Username);
 
                 Window dashboard;
 
