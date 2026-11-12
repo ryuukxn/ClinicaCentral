@@ -60,7 +60,7 @@ namespace ClinicaCentral
         private void DrawAvailability(WeeklyAvailability week)
         {
             foreach (UIElement old in _cells)
-                AvailabilityGrid.Children.Remove(old);
+            AvailabilityGrid.Children.Remove(old);
             _cells.Clear();
 
             for (int slot = 0; slot < 2; slot++)
@@ -79,26 +79,46 @@ namespace ClinicaCentral
                         back = "#FFF0C2"; fore = "#B7791F";
                     }
 
-                    Border cell = new Border
+                    Button cellButton = new Button
                     {
-                        Background = Hex(back),
-                        CornerRadius = new CornerRadius(8),
+                        Tag = new Tuple<int, int, string>(slot, day, status),
+                        Cursor = System.Windows.Input.Cursors.Hand,
                         Margin = new Thickness(3),
-                        Child = new TextBlock
-                        {
-                            Text = status,
-                            Foreground = Hex(fore),
-                            FontWeight = FontWeights.SemiBold,
-                            FontSize = 14,
-                            HorizontalAlignment = HorizontalAlignment.Center,
-                            VerticalAlignment = VerticalAlignment.Center
-                        }
+                        Template = (ControlTemplate)FindResource("AvailabilityCellTemplate"),
+                        Content = status
                     };
 
-                    Grid.SetRow(cell, slot + 1);
-                    Grid.SetColumn(cell, day + 1);
-                    AvailabilityGrid.Children.Add(cell);
-                    _cells.Add(cell);
+                    cellButton.Background = Hex(back);
+                    cellButton.Foreground = Hex(fore);
+                    cellButton.Click += Cell_Click;
+
+                    Grid.SetRow(cellButton, slot + 1);
+                    Grid.SetColumn(cellButton, day + 1);
+                    AvailabilityGrid.Children.Add(cellButton);
+                    _cells.Add(cellButton);
+                }
+            }
+        }
+
+        private void Cell_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is Tuple<int, int, string> info)
+            {
+                int slot = info.Item1; // 0 o 1
+                int day = info.Item2;  // 0 hanggang 5 (Mon-Sat)
+                string currentStatus = info.Item3;
+
+                // Toggle: Kung Open, gawing Off. Kung Off o Busy, gawing Open.
+                string newStatus = string.Equals(currentStatus, "Open", StringComparison.OrdinalIgnoreCase) ? "Off" : "Open";
+
+                try
+                {
+                    _schedule.UpdateAvailability(_displayName, slot, day, newStatus);
+                    LoadSchedule(); // I-reload ang UI para makita ang pagbabago ng kulay
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Hindi na-update ang availability:\n\n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

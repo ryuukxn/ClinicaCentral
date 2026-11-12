@@ -6,9 +6,20 @@
         WindowStartupLocation="CenterScreen" Background="#E8E8E8"
         FontFamily="Segoe UI">
 
-    <Window.Resources>
+<Window.Resources>
         <FontFamily x:Key="TitleFont">Poppins, Segoe UI Black</FontFamily>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <ControlTemplate x:Key="AvailabilityCellTemplate" TargetType="Button">
+            <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8">
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="bd" Property="Opacity" Value="0.8"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
 
         <Style x:Key="SoftCard" TargetType="Border">
             <Setter Property="Background" Value="White"/>

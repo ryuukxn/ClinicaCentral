@@ -21,10 +21,10 @@ namespace ClinicaCentral
         public void Set(string slot, int weekday, string status)
         {
             int row = Array.FindIndex(Slots, s => string.Equals(s, slot, StringComparison.OrdinalIgnoreCase));
-            int col = weekday - 1;
+            int col = weekday; // 0 = Mon, 5 = Sat
 
             if (row < 0 || col < 0 || col > 5) return;
-            _status[row, col] = status;
+            _status[row, col] = string.IsNullOrEmpty(status) ? "Off" : status;
         }
 
         public string Get(int slotIndex, int dayIndex)
@@ -198,6 +198,28 @@ namespace ClinicaCentral
                 });
             }
             return list;
+        }
+
+        public void UpdateAvailability(string doctorName, int slot, int day, string newStatus)
+        {
+            using var conn = Database.GetConnection();
+            conn.Open();
+
+            // slot index 0 = "Morning", 1 = "Afternoon"
+            string slotName = slot == 0 ? "Morning" : "Afternoon";
+
+            // Kung ang status ay "Off", pwede nating i-update o i-delete para maging Off ang default
+            string query = @"INSERT INTO staff_availability (username, weekday, slot, status)
+                            VALUES (@user, @day, @slot, @status)
+                            ON DUPLICATE KEY UPDATE status = @status;";
+
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@user", doctorName);
+            cmd.Parameters.AddWithValue("@day", day); // 0 hanggang 5 (Mon hanggang Sat)
+            cmd.Parameters.AddWithValue("@slot", slotName);
+            cmd.Parameters.AddWithValue("@status", newStatus);
+
+            cmd.ExecuteNonQuery();
         }
     }
 }
