@@ -7,7 +7,6 @@ using System.Windows.Controls;
 using Microsoft.Win32;
 using MySqlConnector;
 
-
 namespace ClinicaCentral
 {
     public partial class bk_patient : Window
@@ -143,7 +142,25 @@ namespace ClinicaCentral
             try
             {
                 HashSet<TimeSpan> booked = _repo.GetBookedTimes(doctor.Name, date.Value);
+                
+                var docAvailability = _repo.GetDoctorDayAvailability(doctor.Name, date.Value);
+                bool isMorningOpen = string.Equals(docAvailability["Morning"], "Open", StringComparison.OrdinalIgnoreCase);
+                bool isAfternoonOpen = string.Equals(docAvailability["Afternoon"], "Open", StringComparison.OrdinalIgnoreCase);
+
                 slots = ClinicHours.BuildSlots(date.Value, booked, DateTime.Now);
+                foreach (var slot in slots)
+                {
+                    bool isMorningSlot = slot.Time.Hours < 12;
+
+                    if (isMorningSlot && !isMorningOpen)
+                    {
+                        slot.IsAvailable = false;
+                    }
+                    else if (!isMorningSlot && !isAfternoonOpen)
+                    {
+                        slot.IsAvailable = false; 
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -158,7 +175,7 @@ namespace ClinicaCentral
                 button.Content = slot.Label;
                 button.Tag = slot;
                 button.GroupName = "slots";
-                button.IsEnabled = slot.IsAvailable;
+                button.IsEnabled = slot.IsAvailable; 
                 button.Style = (Style)FindResource("SlotButton");
                 button.Checked += Slot_Checked;
                 SlotPanel.Children.Add(button);
@@ -168,7 +185,7 @@ namespace ClinicaCentral
             SetTimeItems(free);
 
             if (free.Count == 0)
-                ShowHint("No free times on this date. Please pick another day.");
+                ShowHint("No free times on this date (Doctor is Off or slots are taken). Please pick another day.");
             else
                 SlotHint.Visibility = Visibility.Collapsed;
         }
@@ -318,6 +335,23 @@ namespace ClinicaCentral
 
             DateTime appointmentDateTime = date.Value.Date + slot.Time;
             string notes = NotesBox.Text.Trim();
+            try
+            {
+                if (!ClinicHours.IsValidAppointmentTime(appointmentDateTime, DateTime.Now) ||
+                    !_repo.IsSlotBookable(doctor.Name, appointmentDateTime))
+                {
+                    MessageBox.Show("That time is no longer available. Please choose another slot.",
+                        "Book Appointment", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    RefreshSlots();
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not verify the time slot.\n\n" + ex.Message,
+                    "Connection problem", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
             try
             {
@@ -325,7 +359,7 @@ namespace ClinicaCentral
                 conn.Open();
 
                 int staffId = 0;
-                string getStaffIdQuery = "SELECT id FROM staff WHERE full_name = @docName LIMIT 1";
+                string getStaffIdQuery = "SELECT id FROM staff WHERE full_name = @docName AND position = 'Doctor' LIMIT 1";
                 using (var cmdStaff = new MySqlCommand(getStaffIdQuery, conn))
                 {
                     cmdStaff.Parameters.AddWithValue("@docName", doctor.Name);
@@ -364,8 +398,6 @@ namespace ClinicaCentral
             }
         }
 
-        
-
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             GoToDashboard();
@@ -402,7 +434,6 @@ namespace ClinicaCentral
                 Close();
                 return;
             }
-
         }
 
         private void Logout_Click(object sender, RoutedEventArgs e)
@@ -415,7 +446,5 @@ namespace ClinicaCentral
             new login_form().Open();
             Close();
         }
-
-        
     }
 }

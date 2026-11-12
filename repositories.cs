@@ -118,4 +118,5 @@ namespace ClinicaCentral
 
         public List<StaffRow> GetStaffList() => Database.GetStaffList();
     }
+
 }

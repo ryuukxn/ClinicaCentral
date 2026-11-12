@@ -21,7 +21,7 @@ namespace ClinicaCentral
         public void Set(string slot, int weekday, string status)
         {
             int row = Array.FindIndex(Slots, s => string.Equals(s, slot, StringComparison.OrdinalIgnoreCase));
-            int col = weekday; // 0 = Mon, 5 = Sat
+            int col = weekday;
 
             if (row < 0 || col < 0 || col > 5) return;
             _status[row, col] = string.IsNullOrEmpty(status) ? "Off" : status;
@@ -105,6 +105,41 @@ namespace ClinicaCentral
     public class ScheduleRepository : Repository
     {
         public ScheduleRepository(DatabaseConnection db) : base(db) { }
+
+        public Dictionary<string, string> GetDoctorDayAvailability(string doctorName, DateTime date)
+        {
+            int weekday = ((int)date.DayOfWeek + 6) % 7; 
+
+            var availability = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Morning", "Off" },
+                { "Afternoon", "Off" }
+            };
+
+            using var conn = OpenConnection();
+            string query = @"SELECT sa.slot, sa.status
+                 FROM staff_availability sa
+                 JOIN users u ON u.username = sa.username
+                 JOIN staff s ON s.user_id = u.id
+                 WHERE s.full_name = @docName AND sa.weekday = @weekday";
+
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@docName", doctorName);
+            cmd.Parameters.AddWithValue("@weekday", weekday);
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                string slot = reader.GetString(0);
+                string status = reader.GetString(1);
+                if (availability.ContainsKey(slot))
+                {
+                    availability[slot] = status;
+                }
+            }
+
+            return availability;
+        }
 
         public WeeklyAvailability GetAvailability(string username)
         {
@@ -205,17 +240,15 @@ namespace ClinicaCentral
             using var conn = Database.GetConnection();
             conn.Open();
 
-            // slot index 0 = "Morning", 1 = "Afternoon"
             string slotName = slot == 0 ? "Morning" : "Afternoon";
 
-            // Kung ang status ay "Off", pwede nating i-update o i-delete para maging Off ang default
             string query = @"INSERT INTO staff_availability (username, weekday, slot, status)
                             VALUES (@user, @day, @slot, @status)
                             ON DUPLICATE KEY UPDATE status = @status;";
 
             using var cmd = new MySqlCommand(query, conn);
             cmd.Parameters.AddWithValue("@user", doctorName);
-            cmd.Parameters.AddWithValue("@day", day); // 0 hanggang 5 (Mon hanggang Sat)
+            cmd.Parameters.AddWithValue("@day", day); 
             cmd.Parameters.AddWithValue("@slot", slotName);
             cmd.Parameters.AddWithValue("@status", newStatus);
 
