@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace ClinicaCentral
 {
@@ -101,15 +102,62 @@ namespace ClinicaCentral
         private void View_Click(object sender, RoutedEventArgs e)
         {
             if (!(sender is Button btn) || !(btn.Tag is int id)) return;
-            if (!_directory.TryFind(id, out PatientRow? p) || p == null) return;
 
-            MessageBox.Show(
-                $"Patient ID:   {p.Code}\n" +
-                $"Name:         {p.Name}\n" +
-                $"Date of birth: {p.DateOfBirth}\n" +
-                $"Contact:      {p.Contact}\n" +
-                $"Last visit:   {p.LastVisit}",
-                "Patient details", MessageBoxButton.OK, MessageBoxImage.Information);
+            try
+            {
+                PatientProfileRow? profile = _patients.GetPatientProfile(id);
+                if (profile == null)
+                {
+                    MessageBox.Show("The selected patient profile could not be found.",
+                        "Patient profile", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                PatientProfilePanel.DataContext = profile;
+                ShowPatientPhoto(profile.Photo);
+                PatientProfilePanel.Visibility = Visibility.Visible;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "The selected patient profile could not be loaded. Make sure MySQL is running in Laragon.\n\n" + ex.Message,
+                    "Patient profile", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void ShowPatientPhoto(byte[]? photoData)
+        {
+            if (photoData == null || photoData.Length == 0)
+            {
+                PatientPhotoCircle.Fill = Brushes.Transparent;
+                PatientPhotoCircle.Visibility = Visibility.Collapsed;
+                PatientAvatarGlyph.Visibility = Visibility.Visible;
+                return;
+            }
+
+            ImageBrush brush = new ImageBrush(PhotoStore.FromBytes(photoData))
+            {
+                Stretch = Stretch.UniformToFill
+            };
+            PatientPhotoCircle.Fill = brush;
+            PatientPhotoCircle.Visibility = Visibility.Visible;
+            PatientAvatarGlyph.Visibility = Visibility.Collapsed;
+        }
+
+        private void ClosePatientProfile_Click(object sender, RoutedEventArgs e)
+        {
+            PatientProfilePanel.Visibility = Visibility.Collapsed;
+            PatientProfilePanel.DataContext = null;
+            ShowPatientPhoto(null);
+        }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape && PatientProfilePanel.Visibility == Visibility.Visible)
+            {
+                ClosePatientProfile_Click(this, new RoutedEventArgs());
+                e.Handled = true;
+            }
         }
 
         private void Add_Click(object sender, RoutedEventArgs e)

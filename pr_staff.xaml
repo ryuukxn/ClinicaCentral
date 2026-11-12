@@ -4,7 +4,7 @@
         Title="ClinicaCentral - Patient Records"
         Height="760" Width="1200" MinHeight="640" MinWidth="1000"
         WindowStartupLocation="CenterScreen" Background="#E8E8E8"
-        FontFamily="Segoe UI">
+        FontFamily="Segoe UI" PreviewKeyDown="Window_PreviewKeyDown">
 
     <Window.Resources>
         <FontFamily x:Key="TitleFont">Poppins, Segoe UI Black</FontFamily>
@@ -231,6 +231,167 @@
                     </DockPanel>
                 </Border>
             </Grid>
+        </Grid>
+
+        <Grid x:Name="PatientProfilePanel" Grid.RowSpan="2" Grid.ColumnSpan="2"
+              Panel.ZIndex="100" Visibility="Collapsed" Background="#80000000"
+              Focusable="True">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <Border Background="White" BorderBrush="#4A90E2" BorderThickness="1" CornerRadius="8"
+                        Padding="24" Margin="28" MaxWidth="1040" HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <StackPanel>
+                        <TextBlock Text="PATIENT PROFILE" FontFamily="{StaticResource TitleFont}"
+                                   FontSize="24" FontWeight="Bold" Margin="0,0,0,16"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="250"/>
+                                <ColumnDefinition Width="18"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Background="#F8F8F8" BorderBrush="#E2E2E2"
+                                    BorderThickness="1" CornerRadius="8" Padding="16,22">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <Grid Width="140" Height="140" HorizontalAlignment="Center">
+                                        <Ellipse Fill="#0B0B0B"/>
+                                        <TextBlock x:Name="PatientAvatarGlyph" FontFamily="Segoe MDL2 Assets"
+                                                   Text="&#xE77B;" FontSize="82" Foreground="White"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <Ellipse x:Name="PatientPhotoCircle" Visibility="Collapsed"/>
+                                    </Grid>
+
+                                    <TextBlock Text="{Binding FullName}" FontSize="19" FontWeight="Bold"
+                                               TextAlignment="Center" TextWrapping="Wrap" Margin="0,16,0,0"/>
+                                    <TextBlock Text="{Binding PatientCode}" FontSize="14"
+                                               TextAlignment="Center" Margin="0,6,0,0"/>
+
+                                    <Border CornerRadius="14" Padding="24,4" HorizontalAlignment="Center"
+                                            Margin="0,16,0,0" BorderThickness="1">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#B9E8A5"/>
+                                                <Setter Property="BorderBrush" Value="#6DBE4F"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Inactive">
+                                                        <Setter Property="Background" Value="#F9C6C6"/>
+                                                        <Setter Property="BorderBrush" Value="#E57373"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="-">
+                                                        <Setter Property="Background" Value="#E2E2E2"/>
+                                                        <Setter Property="BorderBrush" Value="#BDBDBD"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding Status}" FontSize="15" FontWeight="SemiBold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#1B5E20"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Inactive">
+                                                            <Setter Property="Foreground" Value="#D93025"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="-">
+                                                            <Setter Property="Foreground" Value="#666666"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+
+                                    <TextBlock Text="{Binding MemberSinceText}" FontSize="14"
+                                               TextAlignment="Center" Margin="0,16,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="2" Background="White" BorderBrush="#E2E2E2"
+                                    BorderThickness="1" CornerRadius="8" Padding="18">
+                                <StackPanel>
+                                    <StackPanel HorizontalAlignment="Left" Margin="0,0,0,10">
+                                        <TextBlock Text="Personal Information" FontSize="17"
+                                                   FontWeight="SemiBold"/>
+                                        <Border Height="3" Background="#3B6FCB" Margin="0,3,0,0"/>
+                                    </StackPanel>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <StackPanel Grid.Row="0" Grid.Column="0">
+                                            <TextBlock Text="Full Name" FontSize="14" Margin="2,0,0,3"/>
+                                            <Border Background="#F2F2F2" CornerRadius="6" Padding="12,9"
+                                                    MinHeight="40" Margin="0,0,0,10">
+                                                <TextBlock Text="{Binding FullName}" FontSize="14" TextWrapping="Wrap"/>
+                                            </Border>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="0" Grid.Column="2">
+                                            <TextBlock Text="Gender" FontSize="14" Margin="2,0,0,3"/>
+                                            <Border Background="#F2F2F2" CornerRadius="6" Padding="12,9"
+                                                    MinHeight="40" Margin="0,0,0,10">
+                                                <TextBlock Text="{Binding Gender}" FontSize="14" TextWrapping="Wrap"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="1" Grid.Column="0">
+                                            <TextBlock Text="Birthdate" FontSize="14" Margin="2,0,0,3"/>
+                                            <Border Background="#F2F2F2" CornerRadius="6" Padding="12,9"
+                                                    MinHeight="40" Margin="0,0,0,10">
+                                                <TextBlock Text="{Binding BirthDateText}" FontSize="14"/>
+                                            </Border>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="1" Grid.Column="2">
+                                            <TextBlock Text="Contact Number" FontSize="14" Margin="2,0,0,3"/>
+                                            <Border Background="#F2F2F2" CornerRadius="6" Padding="12,9"
+                                                    MinHeight="40" Margin="0,0,0,10">
+                                                <TextBlock Text="{Binding ContactNumber}" FontSize="14" TextWrapping="Wrap"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="2" Grid.Column="0">
+                                            <TextBlock Text="Email" FontSize="14" Margin="2,0,0,3"/>
+                                            <Border Background="#F2F2F2" CornerRadius="6" Padding="12,9"
+                                                    MinHeight="40" Margin="0,0,0,10">
+                                                <TextBlock Text="{Binding Email}" FontSize="14" TextWrapping="Wrap"/>
+                                            </Border>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="2" Grid.Column="2">
+                                            <TextBlock Text="Allergies" FontSize="14" Margin="2,0,0,3"/>
+                                            <Border Background="#F2F2F2" CornerRadius="6" Padding="12,9"
+                                                    MinHeight="40" Margin="0,0,0,10">
+                                                <TextBlock Text="{Binding Allergies}" FontSize="14" TextWrapping="Wrap"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3">
+                                            <TextBlock Text="Complete Address" FontSize="14" Margin="2,0,0,3"/>
+                                            <Border Background="#F2F2F2" CornerRadius="6" Padding="12,9"
+                                                    MinHeight="40">
+                                                <TextBlock Text="{Binding Address}" FontSize="14" TextWrapping="Wrap"/>
+                                            </Border>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Button Content="Close" Width="120" Height="38" Margin="0,18,0,0"
+                                HorizontalAlignment="Right" Style="{StaticResource BlueButton}"
+                                Click="ClosePatientProfile_Click"/>
+                    </StackPanel>
+                </Border>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </Window>
