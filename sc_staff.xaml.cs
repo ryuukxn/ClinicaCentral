@@ -37,29 +37,97 @@ namespace ClinicaCentral
 
         private void LoadSchedule()
         {
-            try
+             DateTime weekStart = GetWeekStart();
+            DrawAvailability(_schedule.GetAvailability(_displayName),
+                _schedule.GetTimeOffBetween(_displayName, weekStart, weekStart.AddDays(5)),
+                weekStart);
+
+            // 1. Load Booking Requests (Pendings)
+            var requests = _schedule.GetBookingRequests();
+            RequestList.ItemsSource = requests;
+            PendingText.Text = $"{requests.Count} pending";
+            RequestsEmpty.Visibility = requests.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+            // 2. Load Time Off
+            var timeOffs = _schedule.GetTimeOff(_displayName);
+            TimeOffList.ItemsSource = timeOffs;
+            TimeOffEmpty.Visibility = timeOffs.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+            // 3. Load Confirmed Appointments
+            var confirmed = _schedule.GetConfirmed(_displayName);
+            ConfirmedList.ItemsSource = confirmed;
+            ConfirmedCount.Text = confirmed.Count.ToString();
+            ConfirmedEmpty.Visibility = confirmed.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+                        private static DateTime GetWeekStart()
+        {
+            DateTime today = DateTime.Today;
+            if (today.DayOfWeek == DayOfWeek.Sunday) return today.AddDays(1);
+            return today.AddDays(-(((int)today.DayOfWeek + 6) % 7));
+        }
+
+        private static TimeOffRow? FindTimeOff(List<TimeOffRow> list, DateTime date, int slot)
+        {
+            foreach (TimeOffRow t in list)
             {
-                DrawAvailability(_schedule.GetAvailability(_displayName));
-
-                var timeOff = _schedule.GetTimeOff(_displayName);
-                TimeOffList.ItemsSource = timeOff;
-                TimeOffEmpty.Visibility = timeOff.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-
-                var requests = _schedule.GetBookingRequests();
-                RequestList.ItemsSource = requests;
-                PendingText.Text = requests.Count + " pending";
-                RequestsEmpty.Visibility = requests.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-
-                var confirmed = _schedule.GetConfirmed(_displayName);
-                ConfirmedList.ItemsSource = confirmed;
-                ConfirmedCount.Text = confirmed.Count.ToString();
-                ConfirmedEmpty.Visibility = confirmed.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+                if (date.Date < t.StartDate.Date || date.Date > t.EndDate.Date) continue;
+                if (t.Scope == "Both" || (t.Scope == "AM" && slot == 0) || (t.Scope == "PM" && slot == 1))
+                    return t;
             }
-            catch (Exception ex)
+            return null;
+        }
+
+        private void DrawAvailability(WeeklyAvailability week, List<TimeOffRow> timeOff, DateTime weekStart)
+        {
+            foreach (UIElement old in _cells)
+                AvailabilityGrid.Children.Remove(old);
+            _cells.Clear();
+
+            for (int slot = 0; slot < 2; slot++)
             {
-                MessageBox.Show(
-                    "The schedule could not be loaded. Make sure MySQL is running in Laragon and that schedule.sql was run.\n\n" + ex.Message,
-                    "Connection problem", MessageBoxButton.OK, MessageBoxImage.Warning);
+                for (int day = 0; day < 6; day++)
+                {
+                    string status = week.Get(slot, day);
+                    string display = status;
+
+                    string back = "#E3E8F0", fore = "#6B7A90";
+                    if (string.Equals(status, "Open", StringComparison.OrdinalIgnoreCase))
+                    {
+                        back = "#D9F7E3"; fore = "#1E9E4B";
+                    }
+                    else if (string.Equals(status, "Busy", StringComparison.OrdinalIgnoreCase))
+                    {
+                        back = "#FFF0C2"; fore = "#B7791F";
+                    }
+
+                    TimeOffRow? off = FindTimeOff(timeOff, weekStart.AddDays(day), slot);
+                    if (off != null)
+                    {
+                        display = string.IsNullOrEmpty(off.Type) ? "Busy" : off.Type;
+                        if (display == "On Leave") { back = "#3A3A3A"; fore = "#FFFFFF"; }
+                        else if (display == "Emergency") { back = "#FDE2E2"; fore = "#D93025"; }
+                        else { back = "#FFF0C2"; fore = "#B7791F"; }
+                    }
+
+                    Button cellButton = new Button
+                    {
+                        Tag = new Tuple<int, int, string>(slot, day, status),
+                        Cursor = off != null ? System.Windows.Input.Cursors.Arrow : System.Windows.Input.Cursors.Hand,
+                        IsEnabled = off == null,
+                        Margin = new Thickness(3),
+                        Template = (ControlTemplate)FindResource("AvailabilityCellTemplate"),
+                        Content = display
+                    };
+
+                    cellButton.Background = Hex(back);
+                    cellButton.Foreground = Hex(fore);
+                    cellButton.Click += Cell_Click;
+
+                    Grid.SetRow(cellButton, slot + 1);
+                    Grid.SetColumn(cellButton, day + 1);
+                    AvailabilityGrid.Children.Add(cellButton);
+                    _cells.Add(cellButton);
+                }
             }
         }
 

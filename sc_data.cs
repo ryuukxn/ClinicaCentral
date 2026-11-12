@@ -320,6 +320,35 @@ namespace ClinicaCentral
             return list;
         }
 
+        
+        public List<TimeOffRow> GetTimeOffBetween(string username, DateTime from, DateTime to)
+        {
+            var list = new List<TimeOffRow>();
+
+            using var conn = OpenConnection();
+            using var cmd = new MySqlCommand(
+                "SELECT id, start_date, end_date, reason, type FROM time_off " +
+                "WHERE username = @u AND start_date <= @to AND end_date >= @from ORDER BY start_date", conn);
+            cmd.Parameters.AddWithValue("@u", username);
+            cmd.Parameters.AddWithValue("@from", from.Date);
+            cmd.Parameters.AddWithValue("@to", to.Date);
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                list.Add(new TimeOffRow
+                {
+                    Id = Convert.ToInt32(reader.GetValue(0)),
+                    StartDate = Convert.ToDateTime(reader.GetValue(1)),
+                    EndDate = Convert.ToDateTime(reader.GetValue(2)),
+                    Reason = ParseTimeOffReason(reader.IsDBNull(3) ? "" : Convert.ToString(reader.GetValue(3)) ?? "", out string scope),
+                    Type = reader.IsDBNull(4) ? "" : Convert.ToString(reader.GetValue(4)) ?? "",
+                    Scope = scope
+                });
+            }
+            return list;
+        }
+
         public void AddTimeOff(string username, DateTime startDate, DateTime endDate, string type, string scope, string? reason)
         {
             using var conn = OpenConnection();
@@ -414,7 +443,7 @@ namespace ClinicaCentral
             using var cmd = new MySqlCommand(
                 "SELECT a.id, a.appointment_date, CONCAT(p.first_name, ' ', p.last_name) " +
                 "FROM appointments a JOIN patients p ON p.id = a.patient_id " +
-                "WHERE a.status = 'Pending' AND a.appointment_date >= CURDATE() " +
+                "WHERE a.status = 'Pending'" +
                 "ORDER BY a.appointment_date LIMIT 20", conn);
 
             using var reader = cmd.ExecuteReader();
