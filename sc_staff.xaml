@@ -360,13 +360,20 @@
 
                     <Border Grid.Row="1" Style="{StaticResource SoftCard}" Margin="0,14,0,0">
                         <DockPanel>
-                            <TextBlock x:Name="TodayTitle" DockPanel.Dock="Top" Text="Today" Style="{StaticResource CardTitle}" Margin="0,0,0,6"/>
+                            <Grid DockPanel.Dock="Top" Margin="0,0,0,6">
+                                <TextBlock Text="Confirmed Appointments" Style="{StaticResource CardTitle}"/>
+                                <Border Background="#D9F7E3" CornerRadius="12" Padding="12,3"
+                                        HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <TextBlock x:Name="ConfirmedCount" Text="0" FontWeight="SemiBold"
+                                            FontSize="13" Foreground="#1E9E4B"/>
+                                </Border>
+                            </Grid>
 
-                            <TextBlock x:Name="TodayEmpty" DockPanel.Dock="Top" Visibility="Collapsed"
-                                       Text="No appointments today." Foreground="#777" Margin="0,8,0,0"/>
+                            <TextBlock x:Name="ConfirmedEmpty" DockPanel.Dock="Top" Visibility="Collapsed"
+                                    Text="No confirmed appointments." Foreground="#777" Margin="0,8,0,0"/>
 
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                <ItemsControl x:Name="TodayList">
+                                <ItemsControl x:Name="ConfirmedList">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Border BorderBrush="#E8E8E8" BorderThickness="0,0,0,1" Padding="0,10">
@@ -377,38 +384,11 @@
                                                     </Grid.ColumnDefinitions>
                                                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                                         <TextBlock Text="{Binding Patient}" Style="{StaticResource RowName}"/>
-                                                        <TextBlock Text="{Binding TimeText}" Style="{StaticResource RowSub}"/>
+                                                        <TextBlock Text="{Binding WhenText}" Style="{StaticResource RowSub}"/>
                                                     </StackPanel>
-
-                                                    <Button Grid.Column="1" Content="Complete" Tag="{Binding Id}" VerticalAlignment="Center"
-                                                            Style="{StaticResource ActionButton}" Click="Complete_Click"
-                                                            Visibility="{Binding CanComplete, Converter={StaticResource BoolToVis}}"/>
-
-                                                    <Border Grid.Column="1" CornerRadius="14" Padding="14,5" VerticalAlignment="Center"
-                                                            Visibility="{Binding ShowBadge, Converter={StaticResource BoolToVis}}">
-                                                        <Border.Style>
-                                                            <Style TargetType="Border">
-                                                                <Setter Property="Background" Value="#FFF0C2"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding Status}" Value="Completed">
-                                                                        <Setter Property="Background" Value="#D9F7E3"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Border.Style>
-                                                        <TextBlock Text="{Binding Status}" FontWeight="SemiBold" FontSize="14">
-                                                            <TextBlock.Style>
-                                                                <Style TargetType="TextBlock">
-                                                                    <Setter Property="Foreground" Value="#B7791F"/>
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding Status}" Value="Completed">
-                                                                            <Setter Property="Foreground" Value="#1E9E4B"/>
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </TextBlock.Style>
-                                                        </TextBlock>
-                                                    </Border>
+                                                    <Button Grid.Column="1" Content="Complete" Tag="{Binding Id}"
+                                                            VerticalAlignment="Center"
+                                                            Style="{StaticResource ActionButton}" Click="Complete_Click"/>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
@@ -416,9 +396,145 @@
                                 </ItemsControl>
                             </ScrollViewer>
                         </DockPanel>
-                    </Border>
+</Border>
                 </Grid>
             </Grid>
+        </Grid>
+
+        <Grid x:Name="CompletionOverlay" Grid.ColumnSpan="2" Panel.ZIndex="20" Visibility="Collapsed"
+              Background="#80000000">
+            <Border x:Name="CompletionPanel" Style="{StaticResource SoftCard}"
+                    Width="760" MaxHeight="700" Padding="24"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="650">
+                    <StackPanel>
+                        <TextBlock Text="Complete Appointment" Style="{StaticResource CardTitle}"
+                                   FontSize="24"/>
+                        <TextBlock Text="{Binding PatientName}" FontSize="18" FontWeight="SemiBold"
+                                   Margin="0,10,0,0"/>
+                        <TextBlock FontSize="13" Foreground="#777" Margin="0,2,0,14">
+                            <Run Text="Checked by "/>
+                            <Run Text="{Binding DoctorName}"/>
+                        </TextBlock>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                            <RadioButton x:Name="HealthyRadio" GroupName="CompletionType"
+                                         Content="Healthy / Normal" IsChecked="True"
+                                         FontSize="14" Margin="0,0,24,0"/>
+                            <RadioButton x:Name="NeedsPrescriptionRadio" GroupName="CompletionType"
+                                         Content="Not Healthy / Needs Prescription" FontSize="14"/>
+                        </StackPanel>
+
+                        <TextBlock Text="Medical Record" Style="{StaticResource CardTitle}" FontSize="17"/>
+                        <TextBlock Text="Diagnosis (required)" FontSize="13" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                        <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
+                            <TextBox x:Name="DiagnosisInput" Text="Normal / Healthy" MaxLength="150"
+                                     BorderThickness="0" Padding="2,6" FontSize="14"/>
+                        </Border>
+
+                        <StackPanel>
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="Blood pressure" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
+                                        <TextBox x:Name="BpInput" MaxLength="20" BorderThickness="0" Padding="2,6"/>
+                                    </Border>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                    <TextBlock Text="Temperature (°C)" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
+                                        <TextBox x:Name="TemperatureInput" BorderThickness="0" Padding="2,6"/>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="Pulse" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
+                                        <TextBox x:Name="PulseInput" BorderThickness="0" Padding="2,6"/>
+                                    </Border>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                    <TextBlock Text="Weight (kg)" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
+                                        <TextBox x:Name="WeightInput" BorderThickness="0" Padding="2,6"/>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Text="Notes" FontSize="13" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
+                                <TextBox x:Name="NotesInput" MinHeight="52" AcceptsReturn="True"
+                                         TextWrapping="Wrap" BorderThickness="0" Padding="2,6"/>
+                            </Border>
+                            <TextBlock Text="Treatment" FontSize="13" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
+                                <TextBox x:Name="TreatmentInput" MinHeight="52" AcceptsReturn="True"
+                                         TextWrapping="Wrap" BorderThickness="0" Padding="2,6"/>
+                            </Border>
+                        </StackPanel>
+
+                        <TextBlock Text="Prescription" Style="{StaticResource CardTitle}" FontSize="17" Margin="0,14,0,0"/>
+                        <StackPanel x:Name="PrescriptionFields">
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="Medicine name (required)" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
+                                        <TextBox x:Name="MedicineInput" MaxLength="100" BorderThickness="0" Padding="2,6"/>
+                                    </Border>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                    <TextBlock Text="Dosage (required)" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
+                                        <TextBox x:Name="DosageInput" MaxLength="50" BorderThickness="0" Padding="2,6"/>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="Frequency (required)" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
+                                        <TextBox x:Name="FrequencyInput" MaxLength="100" BorderThickness="0" Padding="2,6"/>
+                                    </Border>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                    <TextBlock Text="Duration (required)" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
+                                        <TextBox x:Name="DurationInput" MaxLength="50" BorderThickness="0" Padding="2,6"/>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Text="Prescription notes (optional)" FontSize="13" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
+                                <TextBox x:Name="PrescriptionDescriptionInput" MinHeight="48"
+                                         AcceptsReturn="True" TextWrapping="Wrap" BorderThickness="0" Padding="2,6"/>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+                            <Button Content="Cancel" Width="100" Margin="0,0,8,0"
+                                    Style="{StaticResource DeclineButton}" Click="CancelCompletion_Click"/>
+                            <Button Content="Save &amp; Complete" Width="150"
+                                    Style="{StaticResource ActionButton}" Click="SaveComplete_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
         </Grid>
     </Grid>
 </Window>

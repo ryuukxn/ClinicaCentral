@@ -11,6 +11,7 @@ namespace ClinicaCentral
         public string Dosage { get; set; } = "";
         public string Frequency { get; set; } = "";
         public string Duration { get; set; } = "";
+        public string Description { get; set; } = "";
     }
 
     public class VisitSummary
@@ -106,8 +107,9 @@ namespace ClinicaCentral
             }
 
             using (var cmd = new MySqlCommand(
-                "SELECT medicine, intake, frequency, duration FROM prescriptions " +
-                "WHERE patient_id = @id AND prescribed_on = @day ORDER BY id", conn))
+                "SELECT pr.medicine_name, pr.dosage, pr.frequency, pr.duration, pr.description " +
+                "FROM prescriptions pr JOIN medical_records mr ON mr.id = pr.id " +
+                "WHERE mr.patient_id = @id AND mr.record_date = @day ORDER BY pr.id", conn))
             {
                 cmd.Parameters.AddWithValue("@id", patientId);
                 cmd.Parameters.AddWithValue("@day", appointment.When.Date);
@@ -120,7 +122,8 @@ namespace ClinicaCentral
                         Medicine = Convert.ToString(reader.GetValue(0)) ?? "",
                         Dosage = reader.IsDBNull(1) ? "" : Convert.ToString(reader.GetValue(1)) ?? "",
                         Frequency = reader.IsDBNull(2) ? "" : Convert.ToString(reader.GetValue(2)) ?? "",
-                        Duration = reader.IsDBNull(3) ? "" : Convert.ToString(reader.GetValue(3)) ?? ""
+                        Duration = reader.IsDBNull(3) ? "" : Convert.ToString(reader.GetValue(3)) ?? "",
+                        Description = reader.IsDBNull(4) ? "" : Convert.ToString(reader.GetValue(4)) ?? ""
                     });
                 }
             }

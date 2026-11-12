@@ -65,7 +65,8 @@ namespace ClinicaCentral
 
         public static ConditionInfo FromLabel(string label)
         {
-            if (string.Equals(label, "Normal", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(label, "Normal", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(label, "Normal / Healthy", StringComparison.OrdinalIgnoreCase))
                 return new ConditionInfo("Normal", "You are in Good Health!", "#D4F3C4", "#2E9E2E");
 
             if (string.Equals(label, "Needs Attention", StringComparison.OrdinalIgnoreCase))
@@ -109,9 +110,12 @@ namespace ClinicaCentral
             return Scalar("SELECT COUNT(*) FROM appointments WHERE patient_id = @id", patientId);
         }
 
-        public int CountActivePrescriptions(int patientId)
+        public int CountPrescriptions(int patientId)
         {
-            return Scalar("SELECT COUNT(*) FROM prescriptions WHERE patient_id = @id AND status = 'Active'", patientId);
+            return Scalar(
+                "SELECT COUNT(*) FROM prescriptions pr " +
+                "JOIN medical_records mr ON mr.id = pr.id WHERE mr.patient_id = @id",
+                patientId);
         }
 
         public List<PatientAppointmentRow> GetUpcomingAppointments(int patientId)
@@ -139,14 +143,15 @@ namespace ClinicaCentral
             return list;
         }
 
-        public List<PrescriptionRow> GetActivePrescriptions(int patientId)
+        public List<PrescriptionRow> GetPrescriptions(int patientId)
         {
             var list = new List<PrescriptionRow>();
 
             using var conn = OpenConnection();
             using var cmd = new MySqlCommand(
-                "SELECT id, medicine, intake FROM prescriptions " +
-                "WHERE patient_id = @id AND status = 'Active' ORDER BY id LIMIT 6", conn);
+                "SELECT pr.id, pr.medicine_name, pr.dosage " +
+                "FROM prescriptions pr JOIN medical_records mr ON mr.id = pr.id " +
+                "WHERE mr.patient_id = @id ORDER BY mr.record_date DESC, pr.id DESC LIMIT 6", conn);
             cmd.Parameters.AddWithValue("@id", patientId);
 
             using var reader = cmd.ExecuteReader();
@@ -166,15 +171,21 @@ namespace ClinicaCentral
         {
             using var conn = OpenConnection();
             using var cmd = new MySqlCommand(
-                "SELECT result_condition FROM medical_records " +
-                "WHERE patient_id = @id AND result_condition IS NOT NULL " +
+                "SELECT COALESCE(result_condition, diagnosis) FROM medical_records " +
+                "WHERE patient_id = @id AND (result_condition IS NOT NULL OR diagnosis IS NOT NULL) " +
                 "ORDER BY record_date DESC, id DESC LIMIT 1", conn);
             cmd.Parameters.AddWithValue("@id", patientId);
 
             object? result = cmd.ExecuteScalar();
             if (result == null || result is DBNull) return ConditionInfo.None;
 
-            return ConditionInfo.FromLabel(Convert.ToString(result) ?? "");
+            string diagnosis = Convert.ToString(result) ?? "";
+            if (string.Equals(diagnosis, "Normal / Healthy", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(diagnosis, "Normal", StringComparison.OrdinalIgnoreCase))
+                return ConditionInfo.FromLabel("Normal");
+            if (string.Equals(diagnosis, "Critical", StringComparison.OrdinalIgnoreCase))
+                return ConditionInfo.FromLabel("Critical");
+            return ConditionInfo.FromLabel("Needs Attention");
         }
 
         private int Scalar(string sql, int patientId)

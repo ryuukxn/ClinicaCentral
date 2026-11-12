@@ -197,17 +197,17 @@ namespace ClinicaCentral
     {
         public MedicalRecordRepository(DatabaseConnection db) : base(db) { }
 
-        public List<MedicalRecordRow> GetAll()
+        public List<MedicalRecordRow> GetForDoctor(string doctorName)
         {
-            return Query("", null);
+            return Query("WHERE m.doctor = @doctor ", null, doctorName);
         }
 
         public List<MedicalRecordRow> GetForPatient(int patientId)
         {
-            return Query("WHERE m.patient_id = @pid ", patientId);
+            return Query("WHERE m.patient_id = @pid ", patientId, null);
         }
 
-        private List<MedicalRecordRow> Query(string where, int? patientId)
+        private List<MedicalRecordRow> Query(string where, int? patientId, string? doctorName)
         {
             var list = new List<MedicalRecordRow>();
 
@@ -220,6 +220,7 @@ namespace ClinicaCentral
                 "FROM medical_records m JOIN patients p ON p.id = m.patient_id " + where +
                 "ORDER BY m.record_date DESC, m.id DESC", conn);
             if (patientId.HasValue) cmd.Parameters.AddWithValue("@pid", patientId.Value);
+            if (doctorName != null) cmd.Parameters.AddWithValue("@doctor", doctorName);
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())

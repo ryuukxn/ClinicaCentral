@@ -286,8 +286,23 @@
                                             </Border>
 
                                             <Button Grid.Column="4" Content="Cancel" Tag="{Binding Id}" Foreground="#E53935"
-                                                    HorizontalAlignment="Left" Style="{StaticResource LinkButton}" Click="Cancel_Click"
-                                                    Visibility="{Binding CanCancel, Converter={StaticResource BoolToVis}}"/>
+                                                    HorizontalAlignment="Left" Click="Cancel_Click">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource LinkButton}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Confirmed">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Completed">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Cancelled">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
                                             <Button Grid.Column="4" Content="View" Tag="{Binding Id}" Foreground="#2F5FCB"
                                                     HorizontalAlignment="Left" Style="{StaticResource LinkButton}" Click="View_Click"
                                                     Visibility="{Binding ShowView, Converter={StaticResource BoolToVis}}"/>

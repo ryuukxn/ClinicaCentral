@@ -77,12 +77,12 @@ namespace ClinicaCentral
                     NextDoctorText.Text = "No upcoming visit";
                 }
 
-                PrescriptionCountText.Text = _repo.CountActivePrescriptions(_user.PatientId).ToString();
+                PrescriptionCountText.Text = _repo.CountPrescriptions(_user.PatientId).ToString();
                 TotalAppointmentsText.Text = _repo.CountTotalAppointments(_user.PatientId).ToString();
 
                 ShowCondition(_repo.GetLatestCondition(_user.PatientId));
 
-                var prescriptions = _repo.GetActivePrescriptions(_user.PatientId);
+                var prescriptions = _repo.GetPrescriptions(_user.PatientId);
                 PrescriptionList.ItemsSource = prescriptions;
                 PrescriptionEmpty.Visibility = prescriptions.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 

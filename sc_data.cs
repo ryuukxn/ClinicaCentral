@@ -102,9 +102,151 @@ namespace ClinicaCentral
         }
     }
 
+    public class ConfirmedRow
+    {
+        public int Id { get; set; }
+        public int PatientId { get; set; }
+        public DateTime When { get; set; }
+        public string Patient { get; set; } = "";
+
+        public string WhenText
+        {
+            get { return When.ToString("ddd, MMM d \u00B7 h:mm tt", CultureInfo.InvariantCulture); }
+        }
+
+        public string DateText
+        {
+            get { return When.ToString("ddd, MMM d", CultureInfo.InvariantCulture); }
+        }
+
+        public string TimeText
+        {
+            get { return When.ToString("h:mm tt", CultureInfo.InvariantCulture); }
+        }
+    }
+
     public class ScheduleRepository : Repository
     {
         public ScheduleRepository(DatabaseConnection db) : base(db) { }
+
+        public List<ConfirmedRow> GetConfirmed(string username)
+        {
+            var list = new List<ConfirmedRow>();
+
+            using var conn = OpenConnection();
+            using var cmd = new MySqlCommand(
+                @"SELECT a.id, a.patient_id, a.appointment_date, CONCAT(p.first_name, ' ', p.last_name)
+                FROM appointments a
+                JOIN patients p ON p.id = a.patient_id
+                JOIN staff s ON s.id = a.staff_id
+                JOIN users u ON u.id = s.user_id
+                WHERE u.username = @u
+                    AND a.status = 'Confirmed'
+                    AND a.appointment_date >= CURDATE()
+                ORDER BY a.appointment_date", conn);
+            cmd.Parameters.AddWithValue("@u", username);
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                list.Add(new ConfirmedRow
+                {
+                    Id = Convert.ToInt32(reader.GetValue(0)),
+                    PatientId = Convert.ToInt32(reader.GetValue(1)),
+                    When = Convert.ToDateTime(reader.GetValue(2)),
+                    Patient = Convert.ToString(reader.GetValue(3)) ?? ""
+                });
+            }
+            return list;
+        }
+
+        public void CompleteAppointment(AppointmentCompletion completion)
+        {
+            using var conn = OpenConnection();
+            using var transaction = conn.BeginTransaction();
+
+            try
+            {
+                long medicalRecordId;
+                using (var cmd = new MySqlCommand(
+                    @"INSERT INTO medical_records
+                        (patient_id, record_date, diagnosis, doctor, notes, bp, temperature, pulse, weight_kg, treatment)
+                      VALUES
+                        (@patientId, CURDATE(), @diagnosis, @doctor, @notes, @bp, @temperature, @pulse, @weightKg, @treatment)",
+                    conn, transaction))
+                {
+                    cmd.Parameters.AddWithValue("@patientId", completion.PatientId);
+                    cmd.Parameters.AddWithValue("@diagnosis", completion.Diagnosis);
+                    cmd.Parameters.AddWithValue("@doctor", completion.Doctor);
+                    cmd.Parameters.AddWithValue("@notes", DbValue(completion.Notes));
+                    cmd.Parameters.AddWithValue("@bp", DbValue(completion.Bp));
+                    cmd.Parameters.AddWithValue("@temperature", DbValue(completion.Temperature));
+                    cmd.Parameters.AddWithValue("@pulse", DbValue(completion.Pulse));
+                    cmd.Parameters.AddWithValue("@weightKg", DbValue(completion.WeightKg));
+                    cmd.Parameters.AddWithValue("@treatment", DbValue(completion.Treatment));
+                    cmd.ExecuteNonQuery();
+                    medicalRecordId = cmd.LastInsertedId;
+                }
+
+                if (completion.NeedsPrescription)
+                {
+                    using var cmd = new MySqlCommand(
+                        @"INSERT INTO prescriptions
+                            (id, medicine_name, dosage, frequency, duration, description)
+                          VALUES
+                            (@id, @medicineName, @dosage, @frequency, @duration, @description)",
+                        conn, transaction);
+                    cmd.Parameters.AddWithValue("@id", medicalRecordId);
+                    cmd.Parameters.AddWithValue("@medicineName", completion.MedicineName);
+                    cmd.Parameters.AddWithValue("@dosage", completion.Dosage);
+                    cmd.Parameters.AddWithValue("@frequency", completion.Frequency);
+                    cmd.Parameters.AddWithValue("@duration", completion.Duration);
+                    cmd.Parameters.AddWithValue("@description", DbValue(completion.Description));
+                    cmd.ExecuteNonQuery();
+                }
+
+                using (var cmd = new MySqlCommand(
+                    @"UPDATE appointments a
+                      JOIN staff s ON s.id = a.staff_id
+                      JOIN users u ON u.id = s.user_id
+                      SET a.status = 'Completed'
+                      WHERE a.id = @appointmentId
+                        AND a.patient_id = @patientId
+                        AND u.username = @doctor
+                        AND a.status = 'Confirmed'",
+                    conn, transaction))
+                {
+                    cmd.Parameters.AddWithValue("@appointmentId", completion.AppointmentId);
+                    cmd.Parameters.AddWithValue("@patientId", completion.PatientId);
+                    cmd.Parameters.AddWithValue("@doctor", completion.Doctor);
+                    if (cmd.ExecuteNonQuery() != 1)
+                        throw new InvalidOperationException("This appointment is no longer confirmed or assigned to your account.");
+                }
+
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+
+        private static object DbValue(object? value)
+        {
+            return value ?? DBNull.Value;
+        }
+
+
+        public void UpdateAppointmentStatus(int appointmentId, string status)
+        {
+            using var conn = OpenConnection();
+            string query = "UPDATE appointments SET status = @status WHERE id = @id";
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@status", status);
+            cmd.Parameters.AddWithValue("@id", appointmentId);
+            cmd.ExecuteNonQuery();
+        }
 
         public Dictionary<string, string> GetDoctorDayAvailability(string doctorName, DateTime date)
         {
@@ -254,5 +396,25 @@ namespace ClinicaCentral
 
             cmd.ExecuteNonQuery();
         }
+    }
+
+    public sealed class AppointmentCompletion
+    {
+        public int AppointmentId { get; set; }
+        public int PatientId { get; set; }
+        public string Doctor { get; set; } = "";
+        public string Diagnosis { get; set; } = "";
+        public string? Notes { get; set; }
+        public string? Bp { get; set; }
+        public decimal? Temperature { get; set; }
+        public int? Pulse { get; set; }
+        public decimal? WeightKg { get; set; }
+        public string? Treatment { get; set; }
+        public bool NeedsPrescription { get; set; }
+        public string MedicineName { get; set; } = "";
+        public string Dosage { get; set; } = "";
+        public string Frequency { get; set; } = "";
+        public string Duration { get; set; } = "";
+        public string? Description { get; set; }
     }
 }

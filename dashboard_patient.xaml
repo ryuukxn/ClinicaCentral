@@ -221,7 +221,7 @@
 
                     <Border Grid.Column="2" Style="{StaticResource Card}">
                         <StackPanel>
-                            <TextBlock Text="Active Prescriptions" Style="{StaticResource StatTitle}"/>
+                            <TextBlock Text="Prescriptions" Style="{StaticResource StatTitle}"/>
                             <StackPanel Orientation="Horizontal">
                                 <Border Style="{StaticResource StatIcon}"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8A5;" FontSize="18" Foreground="#3B6FCB" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
                                 <TextBlock x:Name="PrescriptionCountText" Text="0" FontSize="30" FontWeight="SemiBold" Foreground="#3B6FCB"/>

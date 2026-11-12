@@ -31,7 +31,7 @@ namespace ClinicaCentral
             try
             {
                 _all.Clear();
-                _all.AddRange(_records.GetAll());
+                _all.AddRange(_records.GetForDoctor(_displayName));
                 _pages.Load(_all);
                 ShowPage();
             }
