@@ -45,7 +45,8 @@ namespace ClinicaCentral
                 RecentList.ItemsSource = recent;
                 RecentEmpty.Visibility = recent.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
-                PendingLabText.Text = _dashboard.GetPendingLabCount().ToString();
+               TotalAppointmentsText.Text = appointments.Count.ToString();
+
             }
             catch (Exception ex)
             {

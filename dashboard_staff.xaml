@@ -196,8 +196,8 @@
                     </Border>
                     <Border Grid.Column="4" Style="{StaticResource Card}">
                         <StackPanel>
-                            <TextBlock Text="Pending Lab Results" Style="{StaticResource StatLabel}"/>
-                            <TextBlock x:Name="PendingLabText" Text="0" Style="{StaticResource StatNumber}"/>
+                            <TextBlock Text="Total Appointments" Style="{StaticResource StatLabel}"/>
+                            <TextBlock x:Name="TotalAppointmentsText" Text="0" Style="{StaticResource StatNumber}"/>
                         </StackPanel>
                     </Border>
                 </Grid>
