@@ -91,7 +91,7 @@ namespace ClinicaCentral
                     string display = status;
 
                     string back = "#E3E8F0", fore = "#6B7A90";
-                    if (string.Equals(status, "Open", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(status, "On Duty", StringComparison.OrdinalIgnoreCase))
                     {
                         back = "#D9F7E3"; fore = "#1E9E4B";
                     }
