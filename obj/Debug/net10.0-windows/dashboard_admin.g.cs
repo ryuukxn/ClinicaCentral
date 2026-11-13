@@ -107,7 +107,7 @@ namespace ClinicaCentral {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ClinicaCentral;V1.0.0.0;component/dashboard_admin.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ClinicaCentral;component/dashboard_admin.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\dashboard_admin.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

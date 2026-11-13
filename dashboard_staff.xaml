@@ -299,17 +299,12 @@
 
                     <Border Grid.Column="0" Style="{StaticResource Card}" MaxHeight="230">
                         <DockPanel>
-                            <DockPanel DockPanel.Dock="Top" LastChildFill="False">
-                                <TextBlock DockPanel.Dock="Left" Text="Recent Patients" Style="{StaticResource CardTitle}"/>
-                                <Button DockPanel.Dock="Right" Content="View Patient" Style="{StaticResource PillButton}"
-                                        Click="ViewPatient_Click"/>
-                            </DockPanel>
+                            <TextBlock DockPanel.Dock="Top" Text="Recent Patients" Style="{StaticResource CardTitle}"/>
                             <Grid DockPanel.Dock="Top" Margin="0,0,0,6">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="110"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="100"/>
-                                    <ColumnDefinition Width="140"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="Time" Style="{StaticResource ColHeader}"/>
                                 <TextBlock Grid.Column="1" Text="Patient Name" Style="{StaticResource ColHeader}"/>
@@ -327,18 +322,10 @@
                                                         <ColumnDefinition Width="110"/>
                                                         <ColumnDefinition Width="*"/>
                                                         <ColumnDefinition Width="100"/>
-                                                        <ColumnDefinition Width="140"/>
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Grid.Column="0" Text="{Binding Time}" Style="{StaticResource Cell}"/>
                                                     <TextBlock Grid.Column="1" Text="{Binding PatientName}" Style="{StaticResource Cell}"/>
                                                     <TextBlock Grid.Column="2" Text="{Binding Status}" Style="{StaticResource StatusCell}"/>
-                                                    <StackPanel Grid.Column="3" Orientation="Horizontal">
-                                                        <Button Content="Edit" Tag="{Binding Id}" Style="{StaticResource PillButton}"
-                                                                Padding="10,3" Margin="0,0,6,0" Click="EditPatient_Click"/>
-                                                        <Button Content="Delete" Tag="{Binding Id}" Style="{StaticResource PillButton}"
-                                                                Padding="10,3" Foreground="#D32F2F" BorderBrush="#D32F2F"
-                                                                Click="DeletePatient_Click"/>
-                                                    </StackPanel>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
