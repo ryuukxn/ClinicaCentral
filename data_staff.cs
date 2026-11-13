@@ -107,7 +107,7 @@ namespace ClinicaCentral
             cmd.CommandText =
                 "SELECT p.id, CONCAT(p.first_name, ' ', p.last_name) " +
                 "FROM appointments a JOIN patients p ON p.id = a.patient_id " +
-                "WHERE DATE(a.appointment_date) = CURDATE() AND a.status = 'Scheduled' " +
+                "WHERE DATE(a.appointment_date) = CURDATE() AND a.status = 'Confirmed' " +
                 "ORDER BY a.appointment_date";
 
             using var reader = cmd.ExecuteReader();
