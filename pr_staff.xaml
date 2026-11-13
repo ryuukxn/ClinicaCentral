@@ -161,8 +161,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="12"/>
                                 <ColumnDefinition Width="120"/>
-                                <ColumnDefinition Width="12"/>
-                                <ColumnDefinition Width="120"/>
+                          
                             </Grid.ColumnDefinitions>
 
                             <Grid Grid.Column="0">
@@ -174,7 +173,7 @@
                             </Grid>
 
                             <Button Grid.Column="2" Content="Search" Height="38" Style="{StaticResource BlueButton}" Click="Search_Click"/>
-                            <Button Grid.Column="4" Content="Add" Height="38" Style="{StaticResource BlueButton}" Click="Add_Click"/>
+                          
                         </Grid>
                     </StackPanel>
                 </Border>
