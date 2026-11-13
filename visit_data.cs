@@ -108,7 +108,7 @@ namespace ClinicaCentral
 
             using (var cmd = new MySqlCommand(
                 "SELECT pr.medicine_name, pr.dosage, pr.frequency, pr.duration, pr.description " +
-                "FROM prescriptions pr JOIN medical_records mr ON mr.id = pr.id " +
+                "FROM prescriptions pr JOIN medical_records mr ON mr.id = pr.medical_record_id " +
                 "WHERE mr.patient_id = @id AND mr.record_date = @day ORDER BY pr.prescription_id", conn))
             {
                 cmd.Parameters.AddWithValue("@id", patientId);

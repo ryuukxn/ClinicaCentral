@@ -88,10 +88,9 @@ namespace ClinicaCentral
                 for (int day = 0; day < 6; day++)
                 {
                     string status = week.Get(slot, day);
-                    string display = status;
-
+                    string display = StatusLabel(status);
                     string back = "#E3E8F0", fore = "#6B7A90";
-                    if (string.Equals(status, "On Duty", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(status, "Open", StringComparison.OrdinalIgnoreCase))
                     {
                         back = "#D9F7E3"; fore = "#1E9E4B";
                     }
@@ -118,6 +117,7 @@ namespace ClinicaCentral
                         Template = (ControlTemplate)FindResource("AvailabilityCellTemplate"),
                         Content = display
                     };
+                    
 
                     cellButton.Background = Hex(back);
                     cellButton.Foreground = Hex(fore);
@@ -129,6 +129,13 @@ namespace ClinicaCentral
                     _cells.Add(cellButton);
                 }
             }
+        }
+
+        private static string StatusLabel(string status)
+        {
+            if (string.Equals(status, "Open", StringComparison.OrdinalIgnoreCase)) return "On duty";
+            if (string.Equals(status, "Off", StringComparison.OrdinalIgnoreCase)) return "Off duty";
+            return status;
         }
 
         private static SolidColorBrush Hex(string hex) =>
@@ -162,7 +169,7 @@ namespace ClinicaCentral
                         Cursor = System.Windows.Input.Cursors.Hand,
                         Margin = new Thickness(3),
                         Template = (ControlTemplate)FindResource("AvailabilityCellTemplate"),
-                        Content = status
+                        Content = StatusLabel(status)
                     };
 
                     cellButton.Background = Hex(back);

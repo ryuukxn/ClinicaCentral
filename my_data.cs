@@ -113,7 +113,7 @@ namespace ClinicaCentral
                       ORDER BY mr2.id DESC
                       LIMIT 1
                    )
-                  LEFT JOIN prescriptions pr ON pr.id = mr.id
+                  LEFT JOIN prescriptions pr ON pr.medical_record_id = mr.id
                   WHERE a.id = @appointmentId
                    AND a.patient_id = @patientId
                    AND a.status = 'Completed'

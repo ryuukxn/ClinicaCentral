@@ -217,11 +217,11 @@ namespace ClinicaCentral
 
                         using var cmd = new MySqlCommand(
                         @"INSERT INTO prescriptions
-                            (id, medicine_name, dosage, frequency, duration, description)
+                            (medical_record_id, medicine_name, dosage, frequency, duration, description)
                           VALUES
-                            (@id, @medicineName, @dosage, @frequency, @duration, @description)",
+                            (@medicalRecordId, @medicineName, @dosage, @frequency, @duration, @description)",
                             conn, transaction);
-                        cmd.Parameters.AddWithValue("@id", medicalRecordId);
+                        cmd.Parameters.AddWithValue("@medicalRecordId", medicalRecordId);
                         cmd.Parameters.AddWithValue("@medicineName", prescription.MedicineName);
                         cmd.Parameters.AddWithValue("@dosage", prescription.Dosage);
                         cmd.Parameters.AddWithValue("@frequency", prescription.Frequency);
