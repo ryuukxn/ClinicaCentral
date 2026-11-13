@@ -111,7 +111,7 @@ namespace ClinicaCentral
             ResetAccountForm();
             AccountPanelTitle.Text = "Add Account";
             SaveAccountButton.Content = "Save Account";
-            AddAccountPanel.Visibility = Visibility.Visible;
+            ShowAccountForm();
         }
 
         private void CancelAdd_Click(object sender, RoutedEventArgs e)
@@ -127,6 +127,7 @@ namespace ClinicaCentral
             AccountFormFields.Visibility = role.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
             StaffFields.Visibility = role == "Staff" ? Visibility.Visible : Visibility.Collapsed;
             PatientFields.Visibility = role == "Patient" ? Visibility.Visible : Visibility.Collapsed;
+            UpdateAccountPanelHeight();
         }
 
         private void SaveAccount_Click(object sender, RoutedEventArgs e)
@@ -315,7 +316,7 @@ namespace ClinicaCentral
             PatientAddressBox.Text = account.Address;
             PatientAllergiesBox.Text = account.Allergies;
             PatientPhotoText.Text = account.Photo == null ? "No photo selected" : "Current photo will be kept";
-            AddAccountPanel.Visibility = Visibility.Visible;
+            ShowAccountForm();
         }
 
         private void ToggleStatus_Click(object sender, RoutedEventArgs e)
@@ -392,6 +393,36 @@ namespace ClinicaCentral
             AccountPanelTitle.Text = "Add Account";
             SaveAccountButton.Content = "Save Account";
             AddAccountPanel.Visibility = Visibility.Collapsed;
+            SetAccountBrowseVisibility(Visibility.Visible);
+        }
+
+        private void ShowAccountForm()
+        {
+            AddAccountPanel.Visibility = Visibility.Visible;
+            SetAccountBrowseVisibility(Visibility.Collapsed);
+            UpdateAccountPanelHeight();
+        }
+
+        private void SetAccountBrowseVisibility(Visibility visibility)
+        {
+            AccountFiltersPanel.Visibility = visibility;
+            AccountColumnHeaderPanel.Visibility = visibility;
+            AccountListPanel.Visibility = visibility;
+        }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateAccountPanelHeight();
+        }
+
+        private void UpdateAccountPanelHeight()
+        {
+            double availableHeight = Math.Max(260, ActualHeight - 320);
+            string role = (RoleBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
+            double desiredHeight = role == "Patient" ? 500 : role == "Staff" ? 390 : 230;
+
+            AddAccountPanel.MaxHeight = availableHeight;
+            AddAccountPanel.Height = Math.Min(availableHeight, desiredHeight);
         }
 
         private static string GetSelectedContent(ComboBox comboBox)

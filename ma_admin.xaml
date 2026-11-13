@@ -5,7 +5,8 @@
         Width="1280" Height="800" MinWidth="1050" MinHeight="680"
         WindowStartupLocation="CenterScreen"
         Background="#E6E6E6"
-        FontFamily="Segoe UI">
+        FontFamily="Segoe UI"
+        SizeChanged="Window_SizeChanged">
 
     <Window.Resources>
         <Style x:Key="NavButton" TargetType="Button">
@@ -340,18 +341,27 @@
                     </Grid>
 
                     <Border x:Name="AddAccountPanel" Grid.Row="1" Visibility="Collapsed"
-                            Background="#EDEDED" CornerRadius="6" Padding="16" Margin="0,16,0,0">
-                        <StackPanel>
-                            <TextBlock x:Name="AccountPanelTitle" Text="Add Account" FontSize="18"
-                                       FontWeight="Bold" Margin="0,0,0,10"/>
-                            <TextBlock Text="Account type" Style="{StaticResource FieldLabel}"/>
-                            <ComboBox x:Name="RoleBox" Height="38" FontSize="14" Margin="0,0,0,12"
-                                      VerticalContentAlignment="Center" SelectionChanged="AccountRole_SelectionChanged">
-                                <ComboBoxItem Content="Staff"/>
-                                <ComboBoxItem Content="Patient"/>
-                            </ComboBox>
+                            MaxHeight="520" Background="#EDEDED" CornerRadius="6" Padding="16" Margin="0,16,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                            <ScrollViewer MaxHeight="330" VerticalScrollBarVisibility="Auto">
+                            <TextBlock Grid.Row="0" x:Name="AccountPanelTitle" Text="Add Account" FontSize="18"
+                                       FontWeight="Bold" Margin="0,0,0,10"/>
+                            <StackPanel Grid.Row="1">
+                                <TextBlock Text="Account type" Style="{StaticResource FieldLabel}"/>
+                                <ComboBox x:Name="RoleBox" Height="38" FontSize="14" Margin="0,0,0,12"
+                                          VerticalContentAlignment="Center" SelectionChanged="AccountRole_SelectionChanged">
+                                    <ComboBoxItem Content="Staff"/>
+                                    <ComboBoxItem Content="Patient"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                                 <StackPanel x:Name="AccountFormFields" Visibility="Collapsed">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -474,16 +484,17 @@
                                 </StackPanel>
                             </ScrollViewer>
 
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+                            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right"
+                                        Margin="0,14,0,0">
                                 <Button Content="Cancel" Style="{StaticResource SecondaryButton}"
                                         Margin="0,0,10,0" Click="CancelAdd_Click"/>
                                 <Button x:Name="SaveAccountButton" Content="Save Account" Style="{StaticResource PrimaryButton}"
                                         FontSize="14" Click="SaveAccount_Click"/>
                             </StackPanel>
-                        </StackPanel>
+                        </Grid>
                     </Border>
 
-                    <Grid Grid.Row="2" Margin="0,16,0,0">
+                    <Grid x:Name="AccountFiltersPanel" Grid.Row="2" Margin="0,16,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="280"/>
@@ -502,7 +513,7 @@
                                  TextChanged="SearchBox_TextChanged"/>
                     </Grid>
 
-                    <Grid Grid.Row="3" Margin="0,16,0,0">
+                    <Grid x:Name="AccountColumnHeaderPanel" Grid.Row="3" Margin="0,16,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2.2*"/>
                             <ColumnDefinition Width="1.2*"/>
@@ -517,7 +528,8 @@
                         <TextBlock Grid.Column="4" Text="Action" Style="{StaticResource ColumnHeader}"/>
                     </Grid>
 
-                    <Border Grid.Row="4" BorderBrush="#E3E3E3" BorderThickness="0,1,0,0" Margin="0,8,0,0">
+                    <Border x:Name="AccountListPanel" Grid.Row="4" BorderBrush="#E3E3E3"
+                            BorderThickness="0,1,0,0" Margin="0,8,0,0">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <ItemsControl x:Name="AccountList">
                                 <ItemsControl.ItemTemplate>
