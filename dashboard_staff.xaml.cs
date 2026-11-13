@@ -34,16 +34,16 @@ namespace ClinicaCentral
             {
                 TotalPatientsText.Text = _stats.CountPatients().ToString();
 
-                var appointments = _dashboard.GetTodayAppointments();
+                var appointments = _dashboard.GetTodayAppointments(_displayName);
                 AppointmentsList.ItemsSource = appointments;
                 AppointmentsEmpty.Visibility = appointments.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
                 _waitingQueue.Clear();
-                foreach (var entry in _dashboard.GetWaitingPatients())
+                foreach (var entry in _dashboard.GetWaitingPatients(_displayName))
                     _waitingQueue.Add(entry);
                 RefreshQueue();
 
-                var recent = _dashboard.GetRecentPatients(5);
+                var recent = _dashboard.GetRecentPatients(5, _displayName);
                 RecentList.ItemsSource = recent;
                 RecentEmpty.Visibility = recent.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 

@@ -46,8 +46,14 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="#555"/>
             <Style.Triggers>
+                <DataTrigger Binding="{Binding Status}" Value="Pending">
+                    <Setter Property="Foreground" Value="#B7791F"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="Confirmed">
+                    <Setter Property="Foreground" Value="#2F5FCB"/>
+                </DataTrigger>
                 <DataTrigger Binding="{Binding Status}" Value="Scheduled">
-                    <Setter Property="Foreground" Value="#3B6FCB"/>
+                    <Setter Property="Foreground" Value="#2F5FCB"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Status}" Value="Completed">
                     <Setter Property="Foreground" Value="#2E9E4F"/>
@@ -263,6 +269,7 @@
                                 <TextBlock Grid.Column="0" Text="Date" Style="{StaticResource ColHeader}"/>
                                 <TextBlock Grid.Column="1" Text="Time" Style="{StaticResource ColHeader}"/>
                                 <TextBlock Grid.Column="2" Text="Doctor" Style="{StaticResource ColHeader}"/>
+                                <TextBlock Grid.Column="3" Text="Status" Style="{StaticResource ColHeader}"/>
                             </Grid>
 
                             <TextBlock x:Name="AppointmentsEmpty" DockPanel.Dock="Bottom" Visibility="Collapsed"
@@ -278,12 +285,12 @@
                                                         <ColumnDefinition Width="110"/>
                                                         <ColumnDefinition Width="90"/>
                                                         <ColumnDefinition Width="*"/>
-                                                       
+                                                        <ColumnDefinition Width="130"/>
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Grid.Column="0" Text="{Binding When, StringFormat={}{0:MM/dd/yyyy}}" Style="{StaticResource Cell}"/>
                                                     <TextBlock Grid.Column="1" Text="{Binding When, StringFormat={}{0:h:mm tt}}" Style="{StaticResource Cell}"/>
                                                     <TextBlock Grid.Column="2" Text="{Binding DoctorText}" Style="{StaticResource Cell}"/>
-                                                    
+                                                    <TextBlock Grid.Column="3" Text="{Binding Status}" Style="{StaticResource StatusCell}"/>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>

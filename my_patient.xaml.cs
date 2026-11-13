@@ -8,6 +8,7 @@ namespace ClinicaCentral
     public partial class my_patient : Window
     {
         private readonly PatientUser _user;
+        private readonly DatabaseConnection _db;
         private readonly MyAppointmentsRepository _repo;
         private List<MyAppointmentRow> _rows = new List<MyAppointmentRow>();
 
@@ -16,14 +17,14 @@ namespace ClinicaCentral
             InitializeComponent();
 
             _user = user;
-            DatabaseConnection db = new DatabaseConnection();
-            _repo = new MyAppointmentsRepository(db);
+            _db = new DatabaseConnection();
+            _repo = new MyAppointmentsRepository(_db);
 
             WelcomeText.Text = $"Welcome back, {user.Username}!";
-            Loaded += (s, e) => LoadAppointments(db);
+            Loaded += (s, e) => LoadAppointments();
         }
 
-        private void LoadAppointments(DatabaseConnection db)
+        private void LoadAppointments()
         {
             if (_user.PatientId <= 0)
             {
@@ -36,7 +37,7 @@ namespace ClinicaCentral
 
             try
             {
-                PatientProfile? profile = new PatientDashboardRepository(db).GetProfile(_user.PatientId);
+                PatientProfile? profile = new PatientDashboardRepository(_db).GetProfile(_user.PatientId);
                 if (profile != null && profile.FirstName.Length > 0)
                     WelcomeText.Text = $"Welcome back, {profile.FirstName}!";
 
@@ -54,6 +55,51 @@ namespace ClinicaCentral
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
+            if (!(sender is Button button) || !(button.Tag is int id)) return;
+
+            MyAppointmentRow? row = _rows.Find(r => r.Id == id);
+            if (row == null || !row.CanCancel) return;
+
+            MessageBoxResult answer = MessageBox.Show(
+                "Cancel this appointment?",
+                "Cancel appointment", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (answer != MessageBoxResult.Yes) return;
+
+            try
+            {
+                if (!_repo.CancelAppointment(id, _user.PatientId))
+                {
+                    MessageBox.Show(
+                        "This appointment is no longer available to cancel. Refresh your appointments and try again.",
+                        "Cancel appointment", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    LoadAppointments();
+                    return;
+                }
+
+                LoadAppointments();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "The appointment could not be cancelled. Make sure MySQL is running in Laragon.\n\n" + ex.Message,
+                    "Database error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void Edit_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is Button button) || !(button.Tag is int id)) return;
+
+            MyAppointmentRow? row = _rows.Find(r => r.Id == id);
+            if (row == null || !row.CanEdit) return;
+
+            UpdateAppointmentWindow window = new UpdateAppointmentWindow(_user, id)
+            {
+                Owner = this
+            };
+
+            if (window.ShowDialog() == true)
+                LoadAppointments();
         }
 
         private void View_Click(object sender, RoutedEventArgs e)

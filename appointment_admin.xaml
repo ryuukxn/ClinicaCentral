@@ -158,13 +158,16 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Status}" Value="Confirmed">
-                    <Setter Property="Background" Value="#DFF5E6"/>
+                    <Setter Property="Background" Value="#D9E8FB"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="Scheduled">
+                    <Setter Property="Background" Value="#D9E8FB"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Status}" Value="Pending">
-                    <Setter Property="Background" Value="#FDF0C4"/>
+                    <Setter Property="Background" Value="#FFF0C2"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Status}" Value="Completed">
-                    <Setter Property="Background" Value="#DDE8FB"/>
+                    <Setter Property="Background" Value="#D7F5E0"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Status}" Value="Cancelled">
                     <Setter Property="Background" Value="#FBE0E0"/>
@@ -178,13 +181,16 @@
             <Setter Property="Foreground" Value="#555555"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Status}" Value="Confirmed">
-                    <Setter Property="Foreground" Value="#1E8E4E"/>
+                    <Setter Property="Foreground" Value="#2F5FCB"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="Scheduled">
+                    <Setter Property="Foreground" Value="#2F5FCB"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Status}" Value="Pending">
                     <Setter Property="Foreground" Value="#B7791F"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Status}" Value="Completed">
-                    <Setter Property="Foreground" Value="#2B5FD0"/>
+                    <Setter Property="Foreground" Value="#2E9E4F"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Status}" Value="Cancelled">
                     <Setter Property="Foreground" Value="#C0392B"/>

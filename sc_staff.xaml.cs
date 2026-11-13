@@ -43,7 +43,7 @@ namespace ClinicaCentral
                 weekStart);
 
             // 1. Load Booking Requests (Pendings)
-            var requests = _schedule.GetBookingRequests();
+            var requests = _schedule.GetBookingRequests(_displayName);
             RequestList.ItemsSource = requests;
             PendingText.Text = $"{requests.Count} pending";
             RequestsEmpty.Visibility = requests.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -223,7 +223,11 @@ namespace ClinicaCentral
             {
                 try
                 {
-                    _schedule.UpdateAppointmentStatus(appointmentId, "Confirmed");
+                    if (!_schedule.UpdateAppointmentStatus(appointmentId, _displayName, "Confirmed"))
+                    {
+                        MessageBox.Show("This booking request is no longer available to confirm.",
+                            "Booking request", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
                     LoadSchedule();
                 }
                 catch (Exception ex)
@@ -239,7 +243,11 @@ namespace ClinicaCentral
             {
                 try
                 {
-                    _schedule.UpdateAppointmentStatus(appointmentId, "Cancelled");
+                    if (!_schedule.UpdateAppointmentStatus(appointmentId, _displayName, "Cancelled"))
+                    {
+                        MessageBox.Show("This booking request is no longer available to decline.",
+                            "Booking request", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
                     LoadSchedule();
                 }
                 catch (Exception ex)

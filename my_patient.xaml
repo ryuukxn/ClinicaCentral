@@ -241,16 +241,16 @@
                                                                     <Setter Property="BorderBrush" Value="#E0B040"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding Status}" Value="Confirmed">
-                                                                    <Setter Property="Background" Value="#D7F5E0"/>
-                                                                    <Setter Property="BorderBrush" Value="#D7F5E0"/>
+                                                                    <Setter Property="Background" Value="#D9E8FB"/>
+                                                                    <Setter Property="BorderBrush" Value="#A9C6F0"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding Status}" Value="Scheduled">
-                                                                    <Setter Property="Background" Value="#D7F5E0"/>
-                                                                    <Setter Property="BorderBrush" Value="#D7F5E0"/>
+                                                                    <Setter Property="Background" Value="#D9E8FB"/>
+                                                                    <Setter Property="BorderBrush" Value="#A9C6F0"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding Status}" Value="Completed">
-                                                                    <Setter Property="Background" Value="#D9E8FB"/>
-                                                                    <Setter Property="BorderBrush" Value="#D9E8FB"/>
+                                                                    <Setter Property="Background" Value="#D7F5E0"/>
+                                                                    <Setter Property="BorderBrush" Value="#91D4A5"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding Status}" Value="Cancelled">
                                                                     <Setter Property="Background" Value="#FDE2E2"/>
@@ -268,13 +268,13 @@
                                                                         <Setter Property="Foreground" Value="#B7791F"/>
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding Status}" Value="Confirmed">
-                                                                        <Setter Property="Foreground" Value="#1E9E4B"/>
+                                                                        <Setter Property="Foreground" Value="#2F5FCB"/>
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding Status}" Value="Scheduled">
-                                                                        <Setter Property="Foreground" Value="#1E9E4B"/>
+                                                                        <Setter Property="Foreground" Value="#2F5FCB"/>
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding Status}" Value="Completed">
-                                                                        <Setter Property="Foreground" Value="#2F5FCB"/>
+                                                                        <Setter Property="Foreground" Value="#2E9E4F"/>
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding Status}" Value="Cancelled">
                                                                         <Setter Property="Foreground" Value="#D93025"/>
@@ -285,27 +285,19 @@
                                                 </TextBlock>
                                             </Border>
 
-                                            <Button Grid.Column="4" Content="Cancel" Tag="{Binding Id}" Foreground="#E53935"
-                                                    HorizontalAlignment="Left" Click="Cancel_Click">
-                                                <Button.Style>
-                                                    <Style TargetType="Button" BasedOn="{StaticResource LinkButton}">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Status}" Value="Confirmed">
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Status}" Value="Completed">
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Status}" Value="Cancelled">
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Button.Style>
-                                            </Button>
-                                            <Button Grid.Column="4" Content="View" Tag="{Binding Id}" Foreground="#2F5FCB"
-                                                    HorizontalAlignment="Left" Style="{StaticResource LinkButton}" Click="View_Click"
-                                                    Visibility="{Binding ShowView, Converter={StaticResource BoolToVis}}"/>
+                                            <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Button Content="Edit" Tag="{Binding Id}" Foreground="#2F5FCB"
+                                                        Style="{StaticResource LinkButton}" Click="Edit_Click"
+                                                        Visibility="{Binding CanEdit, Converter={StaticResource BoolToVis}}"/>
+                                                <Button Content="Cancel" Tag="{Binding Id}" Foreground="#E53935"
+                                                        Margin="10,0,0,0" Style="{StaticResource LinkButton}"
+                                                        Click="Cancel_Click"
+                                                        Visibility="{Binding CanCancel, Converter={StaticResource BoolToVis}}"/>
+                                                <Button Content="View" Tag="{Binding Id}" Foreground="#2F5FCB"
+                                                        Margin="10,0,0,0" Style="{StaticResource LinkButton}"
+                                                        Click="View_Click"
+                                                        Visibility="{Binding ShowView, Converter={StaticResource BoolToVis}}"/>
+                                            </StackPanel>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>

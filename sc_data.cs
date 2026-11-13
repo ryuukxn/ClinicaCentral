@@ -150,9 +150,9 @@ namespace ClinicaCentral
                 @"SELECT a.id, a.patient_id, a.appointment_date, CONCAT(p.first_name, ' ', p.last_name), s.full_name
                 FROM appointments a
                 JOIN patients p ON p.id = a.patient_id
-                JOIN staff s ON s.id = a.staff_id
-                JOIN users u ON u.id = s.user_id
-                WHERE u.username = @u
+                JOIN users u ON u.username = @u
+                JOIN staff s ON s.user_id = u.id
+                WHERE (a.staff_id = s.id OR a.doctor = s.full_name)
                     AND a.status = 'Confirmed'
                     AND a.appointment_date >= CURDATE()
                 ORDER BY a.appointment_date", conn);
@@ -286,14 +286,23 @@ namespace ClinicaCentral
         }
 
 
-        public void UpdateAppointmentStatus(int appointmentId, string status)
+        public bool UpdateAppointmentStatus(int appointmentId, string username, string status)
         {
+            if (status != "Confirmed" && status != "Cancelled")
+                throw new ArgumentOutOfRangeException(nameof(status), "Only pending booking requests can be confirmed or declined.");
+
             using var conn = OpenConnection();
-            string query = "UPDATE appointments SET status = @status WHERE id = @id";
-            using var cmd = new MySqlCommand(query, conn);
+            using var cmd = new MySqlCommand(
+                "UPDATE appointments a " +
+                "JOIN users login_user ON login_user.username = @username " +
+                "JOIN staff current_staff ON current_staff.user_id = login_user.id " +
+                "SET a.status = @status " +
+                "WHERE a.id = @id AND a.status = 'Pending' " +
+                "AND (a.staff_id = current_staff.id OR a.doctor = current_staff.full_name)", conn);
             cmd.Parameters.AddWithValue("@status", status);
             cmd.Parameters.AddWithValue("@id", appointmentId);
-            cmd.ExecuteNonQuery();
+            cmd.Parameters.AddWithValue("@username", username);
+            return cmd.ExecuteNonQuery() == 1;
         }
 
         public WeeklyAvailability GetAvailability(string username)
@@ -457,7 +466,7 @@ namespace ClinicaCentral
             return availability;
         }
 
-        public List<BookingRequestRow> GetBookingRequests()
+        public List<BookingRequestRow> GetBookingRequests(string username)
         {
             var list = new List<BookingRequestRow>();
 
@@ -465,8 +474,12 @@ namespace ClinicaCentral
             using var cmd = new MySqlCommand(
                 "SELECT a.id, a.appointment_date, CONCAT(p.first_name, ' ', p.last_name) " +
                 "FROM appointments a JOIN patients p ON p.id = a.patient_id " +
-                "WHERE a.status = 'Pending'" +
+                "JOIN users login_user ON login_user.username = @username " +
+                "JOIN staff current_doctor ON current_doctor.user_id = login_user.id " +
+                "WHERE a.status = 'Pending' " +
+                "AND (a.staff_id = current_doctor.id OR a.doctor = current_doctor.full_name) " +
                 "ORDER BY a.appointment_date LIMIT 20", conn);
+            cmd.Parameters.AddWithValue("@username", username);
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())

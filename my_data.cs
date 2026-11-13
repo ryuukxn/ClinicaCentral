@@ -36,9 +36,18 @@ namespace ClinicaCentral
         {
             get
             {
-                bool open = HasStatus("Pending") || HasStatus("Scheduled");
-                return open && When > DateTime.Now;
+                return CanManage && When > DateTime.Now;
             }
+        }
+
+        public bool CanEdit
+        {
+            get { return CanManage && When > DateTime.Now; }
+        }
+
+        private bool CanManage
+        {
+            get { return HasStatus("Pending") || HasStatus("Confirmed") || HasStatus("Scheduled"); }
         }
 
         public bool ShowView
@@ -74,6 +83,20 @@ namespace ClinicaCentral
                 });
             }
             return list;
+        }
+
+        public bool CancelAppointment(int appointmentId, int patientId)
+        {
+            using var conn = OpenConnection();
+            using var cmd = new MySqlCommand(
+                "UPDATE appointments SET status = 'Cancelled' " +
+                "WHERE id = @appointmentId AND patient_id = @patientId " +
+                "AND appointment_date > NOW() " +
+                "AND status IN ('Pending', 'Confirmed', 'Scheduled')", conn);
+            cmd.Parameters.AddWithValue("@appointmentId", appointmentId);
+            cmd.Parameters.AddWithValue("@patientId", patientId);
+
+            return cmd.ExecuteNonQuery() == 1;
         }
 
         public MedicalRecordRow? GetCompletedMedicalRecord(int appointmentId, int patientId)

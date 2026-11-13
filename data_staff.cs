@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
+using MySqlConnector;
 
 namespace ClinicaCentral
 {
@@ -73,42 +75,53 @@ namespace ClinicaCentral
     {
         public DashboardRepository(DatabaseConnection db) : base(db) { }
 
-        public List<AppointmentRow> GetTodayAppointments()
+        public List<AppointmentRow> GetTodayAppointments(string username)
         {
             var list = new List<AppointmentRow>();
 
             using var conn = OpenConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText =
+            using var cmd = new MySqlCommand(
                 "SELECT TIME_FORMAT(a.appointment_date, '%h:%i %p'), CONCAT(p.first_name, ' ', p.last_name), a.status " +
                 "FROM appointments a JOIN patients p ON p.id = a.patient_id " +
+                "JOIN users login_user ON login_user.username = @username " +
+                "JOIN staff current_doctor ON current_doctor.user_id = login_user.id " +
                 "WHERE DATE(a.appointment_date) = CURDATE() " +
-                "ORDER BY a.appointment_date";
+                "AND (current_doctor.position <> 'Doctor' OR a.staff_id = current_doctor.id " +
+                "OR a.doctor = current_doctor.full_name) " +
+                "ORDER BY a.appointment_date", conn);
+            cmd.Parameters.AddWithValue("@username", username);
 
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
+            var table = new DataTable();
+            using (var adapter = new MySqlDataAdapter(cmd))
+                adapter.Fill(table);
+
+            foreach (DataRow row in table.Rows)
             {
                 list.Add(new AppointmentRow
                 {
-                    Time = Convert.ToString(reader.GetValue(0)) ?? "",
-                    PatientName = Convert.ToString(reader.GetValue(1)) ?? "",
-                    Status = Convert.ToString(reader.GetValue(2)) ?? ""
+                    Time = Convert.ToString(row[0]) ?? "",
+                    PatientName = Convert.ToString(row[1]) ?? "",
+                    Status = Convert.ToString(row[2]) ?? ""
                 });
             }
             return list;
         }
 
-        public List<QueueEntry> GetWaitingPatients()
+        public List<QueueEntry> GetWaitingPatients(string username)
         {
             var list = new List<QueueEntry>();
 
             using var conn = OpenConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText =
+            using var cmd = new MySqlCommand(
                 "SELECT p.id, CONCAT(p.first_name, ' ', p.last_name) " +
                 "FROM appointments a JOIN patients p ON p.id = a.patient_id " +
+                "JOIN users login_user ON login_user.username = @username " +
+                "JOIN staff current_doctor ON current_doctor.user_id = login_user.id " +
                 "WHERE DATE(a.appointment_date) = CURDATE() AND a.status = 'Confirmed' " +
-                "ORDER BY a.appointment_date";
+                "AND (current_doctor.position <> 'Doctor' OR a.staff_id = current_doctor.id " +
+                "OR a.doctor = current_doctor.full_name) " +
+                "ORDER BY a.appointment_date", conn);
+            cmd.Parameters.AddWithValue("@username", username);
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
@@ -122,20 +135,26 @@ namespace ClinicaCentral
             return list;
         }
 
-        public List<RecentPatientRow> GetRecentPatients(int count)
+        public List<RecentPatientRow> GetRecentPatients(int count, string username)
         {
             var list = new List<RecentPatientRow>();
 
             using var conn = OpenConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText =
+            using var cmd = new MySqlCommand(
                 "SELECT p.id, TIME_FORMAT(a.appointment_date, '%h:%i %p'), CONCAT(p.first_name, ' ', p.last_name), a.status " +
                 "FROM patients p " +
+                "JOIN users login_user ON login_user.username = @username " +
+                "JOIN staff current_doctor ON current_doctor.user_id = login_user.id " +
                 "JOIN appointments a ON a.id = (SELECT a2.id FROM appointments a2 " +
                 "                               WHERE a2.patient_id = p.id " +
+                "                               AND (current_doctor.position <> 'Doctor' " +
+                "                                    OR a2.staff_id = current_doctor.id " +
+                "                                    OR a2.doctor = current_doctor.full_name) " +
                 "                               ORDER BY a2.appointment_date DESC LIMIT 1) " +
                 "ORDER BY a.appointment_date DESC " +
-                $"LIMIT {Math.Max(1, count)}";
+                "LIMIT @count", conn);
+            cmd.Parameters.AddWithValue("@username", username);
+            cmd.Parameters.AddWithValue("@count", Math.Max(1, count));
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())

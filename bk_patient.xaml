@@ -46,8 +46,14 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="#555"/>
             <Style.Triggers>
+                <DataTrigger Binding="{Binding Status}" Value="Pending">
+                    <Setter Property="Foreground" Value="#B7791F"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="Confirmed">
+                    <Setter Property="Foreground" Value="#2F5FCB"/>
+                </DataTrigger>
                 <DataTrigger Binding="{Binding Status}" Value="Scheduled">
-                    <Setter Property="Foreground" Value="#3B6FCB"/>
+                    <Setter Property="Foreground" Value="#2F5FCB"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Status}" Value="Completed">
                     <Setter Property="Foreground" Value="#2E9E4F"/>

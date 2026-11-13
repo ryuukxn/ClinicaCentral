@@ -117,13 +117,13 @@
                                             <Setter Property="Background" Value="#FFE8A3"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="Confirmed">
-                                            <Setter Property="Background" Value="#A9DD8F"/>
+                                            <Setter Property="Background" Value="#D9E8FB"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="Scheduled">
-                                            <Setter Property="Background" Value="#A9DD8F"/>
+                                            <Setter Property="Background" Value="#D9E8FB"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="Completed">
-                                            <Setter Property="Background" Value="#BFD8F7"/>
+                                            <Setter Property="Background" Value="#D7F5E0"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="Cancelled">
                                             <Setter Property="Background" Value="#F9C6C6"/>
@@ -140,13 +140,13 @@
                                                 <Setter Property="Foreground" Value="#B7791F"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding Status}" Value="Confirmed">
-                                                <Setter Property="Foreground" Value="#2E7D32"/>
+                                                <Setter Property="Foreground" Value="#2F5FCB"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding Status}" Value="Scheduled">
-                                                <Setter Property="Foreground" Value="#2E7D32"/>
+                                                <Setter Property="Foreground" Value="#2F5FCB"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding Status}" Value="Completed">
-                                                <Setter Property="Foreground" Value="#1E5FBF"/>
+                                                <Setter Property="Foreground" Value="#2E9E4F"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding Status}" Value="Cancelled">
                                                 <Setter Property="Foreground" Value="#C62828"/>
