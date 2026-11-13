@@ -10,14 +10,19 @@ namespace ClinicaCentral
     public partial class receipt_preview : Window
     {
         private readonly ReceiptRecord _receipt;
+        private readonly User _user;
+        private readonly ReceiptRepository _receipts;
 
         public bool WasPrinted { get; private set; }
 
-        public receipt_preview(ReceiptRecord receipt)
+        public receipt_preview(int receiptId, User user)
         {
             InitializeComponent();
 
-            _receipt = receipt;
+            _user = user ?? throw new ArgumentNullException(nameof(user));
+            _receipts = new ReceiptRepository(new DatabaseConnection());
+            _receipt = _receipts.GetById(receiptId, _user)
+                ?? throw new UnauthorizedAccessException("You cannot access this receipt.");
             DataContext = _receipt;
         }
 
@@ -42,6 +47,20 @@ namespace ClinicaCentral
             {
                 MessageBox.Show("The receipt PDF could not be saved.\n\n" + ex.Message, "Print Receipt",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                _receipts.MarkPrinted(_receipt.Id, _user);
+                _receipt.Status = "Printed";
+                DataContext = null;
+                DataContext = _receipt;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("The PDF was saved, but the receipt status could not be updated.\n\n" + ex.Message,
+                    "Print Receipt", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 

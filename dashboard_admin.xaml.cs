@@ -146,7 +146,7 @@ namespace ClinicaCentral
 
         private void PrintReceipt_Click(object sender, RoutedEventArgs e)
         {
-            receipt_picker.ShowFor(this);
+            receipt_picker.ShowFor(this, _user);
         }
 
         private void Backup_Click(object sender, RoutedEventArgs e)

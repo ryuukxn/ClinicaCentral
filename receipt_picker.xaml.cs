@@ -7,18 +7,18 @@ namespace ClinicaCentral
 {
     public partial class receipt_picker : Window
     {
-        private readonly string? _issuedBy;
+        private readonly User _user;
 
-        public receipt_picker(string? issuedBy = null)
+        public receipt_picker(User user)
         {
             InitializeComponent();
-            _issuedBy = issuedBy;
+            _user = user ?? throw new ArgumentNullException(nameof(user));
             LoadReceipts();
         }
 
-        public static void ShowFor(Window owner, string? issuedBy = null)
+        public static void ShowFor(Window owner, User user)
         {
-            receipt_picker picker = new receipt_picker(issuedBy);
+            receipt_picker picker = new receipt_picker(user);
             picker.Owner = owner;
             picker.ShowDialog();
         }
@@ -27,7 +27,7 @@ namespace ClinicaCentral
         {
             try
             {
-                List<ReceiptRecord> receipts = new ReceiptRepository(new DatabaseConnection()).GetAll();
+                List<ReceiptRecord> receipts = new ReceiptRepository(new DatabaseConnection()).GetAll(_user);
                 ReceiptList.ItemsSource = receipts;
                 EmptyText.Visibility = receipts.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
@@ -51,14 +51,18 @@ namespace ClinicaCentral
                 return;
             }
 
-            if (!string.IsNullOrWhiteSpace(_issuedBy))
-                receipt.IssuedBy = _issuedBy;
-
-            receipt_preview preview = new receipt_preview(receipt);
-            preview.Owner = this;
-
-            if (preview.ShowDialog() == true)
-                Close();
+            try
+            {
+                receipt_preview preview = new receipt_preview(receipt.Id, _user);
+                preview.Owner = this;
+                if (preview.ShowDialog() == true)
+                    LoadReceipts();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("The receipt could not be opened.\n\n" + ex.Message,
+                    "Receipt access", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void Open_Click(object sender, RoutedEventArgs e)

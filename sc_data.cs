@@ -249,6 +249,27 @@ namespace ClinicaCentral
                         throw new InvalidOperationException("This appointment is no longer confirmed or assigned to your account.");
                 }
 
+                using (var cmd = new MySqlCommand(
+                    @"INSERT INTO receipts
+                        (patient_id, appointment_id, doctor, purpose, status, issued_by, receipt_date)
+                      SELECT a.patient_id, a.id, s.full_name, 'Consultation', 'Issued', @issuedBy, CURDATE()
+                      FROM appointments a
+                      JOIN staff s ON s.id = a.staff_id
+                      JOIN users u ON u.id = s.user_id
+                      WHERE a.id = @appointmentId
+                        AND a.patient_id = @patientId
+                        AND u.username = @doctor
+                        AND a.status = 'Completed'",
+                    conn, transaction))
+                {
+                    cmd.Parameters.AddWithValue("@appointmentId", completion.AppointmentId);
+                    cmd.Parameters.AddWithValue("@patientId", completion.PatientId);
+                    cmd.Parameters.AddWithValue("@doctor", completion.Doctor);
+                    cmd.Parameters.AddWithValue("@issuedBy", completion.Doctor);
+                    if (cmd.ExecuteNonQuery() != 1)
+                        throw new InvalidOperationException("The receipt could not be created for this appointment.");
+                }
+
                 transaction.Commit();
             }
             catch

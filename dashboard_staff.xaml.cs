@@ -130,7 +130,7 @@ namespace ClinicaCentral
 
         private void PrintReceipt_Click(object sender, RoutedEventArgs e)
         {
-            receipt_picker.ShowFor(this, _displayName);
+            receipt_picker.ShowFor(this, new StaffUser(_displayName));
         }
 
         private void Logout_Click(object sender, RoutedEventArgs e)

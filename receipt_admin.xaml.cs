@@ -17,6 +17,9 @@ namespace ClinicaCentral
             InitializeComponent();
 
             _user = user;
+            if (!(_user is AdminUser))
+                throw new UnauthorizedAccessException("Only admins can open the receipts management page.");
+
             _receipts = new ReceiptRepository(new DatabaseConnection());
 
             lblWelcome.Text = _user.GetWelcomeMessage();
@@ -28,7 +31,7 @@ namespace ClinicaCentral
             try
             {
                 _all.Clear();
-                _all.AddRange(_receipts.GetAll());
+                _all.AddRange(_receipts.GetAll(_user));
                 ShowReceipts();
             }
             catch (Exception ex)
@@ -109,9 +112,18 @@ namespace ClinicaCentral
         {
             if (!(sender is Button button) || !(button.Tag is ReceiptRecord item)) return;
 
-            receipt_preview preview = new receipt_preview(item);
-            preview.Owner = this;
-            preview.ShowDialog();
+            try
+            {
+                receipt_preview preview = new receipt_preview(item.Id, _user);
+                preview.Owner = this;
+                if (preview.ShowDialog() == true)
+                    LoadReceipts();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("The receipt could not be opened.\n\n" + ex.Message,
+                    "Receipt access", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void Dashboard_Click(object sender, RoutedEventArgs e)
