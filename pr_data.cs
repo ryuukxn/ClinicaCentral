@@ -106,7 +106,7 @@ namespace ClinicaCentral
                 "latest.weight_kg, latest.height, latest.record_date " +
                 "FROM patients p LEFT JOIN users u ON u.patient_id = p.id " +
                 "LEFT JOIN medical_records latest ON latest.id = (" +
-                "SELECT mr.id FROM medical_records mr WHERE mr.patient_id = p.id " +
+                "SELECT mr.id FROM medical_records mr WHERE mr.patient_id = p.id AND mr.is_deleted = 0 " +
                 "ORDER BY mr.record_date DESC, mr.id DESC LIMIT 1) " +
                 "WHERE p.id = @patientId LIMIT 1";
             cmd.Parameters.AddWithValue("@patientId", patientId);

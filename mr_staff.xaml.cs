@@ -67,7 +67,38 @@ namespace ClinicaCentral
             window.ShowDialog();
         }
 
-        private void Delete_Click(object sender, RoutedEventArgs e) { }
+        private void Delete_Click(object sender, RoutedEventArgs e)
+        {
+            if (_adminUser == null)
+            {
+                MessageBox.Show("Only admins can delete medical records.", "Access denied",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (!(sender is Button button) || !(button.Tag is int recordId))
+            {
+                MessageBox.Show("The medical record could not be identified.", "Medical Records",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            MessageBoxResult answer = MessageBox.Show(
+                "Delete this medical record? It will be moved to Deleted Medical Records and can be restored later.",
+                "Delete medical record", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (answer != MessageBoxResult.Yes) return;
+
+            try
+            {
+                _records.SoftDelete(recordId, _adminUser.Username);
+                LoadRecords();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("The medical record could not be deleted.\n\n" + ex.Message,
+                    "Medical Records", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
         private void AdminNav_Click(object sender, RoutedEventArgs e)
         {

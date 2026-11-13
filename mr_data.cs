@@ -174,12 +174,26 @@ namespace ClinicaCentral
 
         public List<MedicalRecordRow> GetForDoctor(string doctorName)
         {
-            return Query("WHERE m.doctor = @doctor ", null, doctorName);
+            return Query("AND m.doctor = @doctor ", null, doctorName);
         }
 
         public List<MedicalRecordRow> GetForPatient(int patientId)
         {
-            return Query("WHERE m.patient_id = @pid ", patientId, null);
+            return Query("AND m.patient_id = @pid ", patientId, null);
+        }
+
+        public void SoftDelete(int recordId, string deletedBy)
+        {
+            using var conn = OpenConnection();
+            using var cmd = new MySqlCommand(
+                "UPDATE medical_records " +
+                "SET is_deleted = 1, deleted_at = NOW(), deleted_by = @by " +
+                "WHERE id = @id AND is_deleted = 0", conn);
+            cmd.Parameters.AddWithValue("@by", deletedBy);
+            cmd.Parameters.AddWithValue("@id", recordId);
+
+            if (cmd.ExecuteNonQuery() != 1)
+                throw new InvalidOperationException("The medical record was already deleted or no longer exists.");
         }
 
         private List<MedicalRecordRow> Query(string where, int? patientId, string? doctorName)
@@ -195,7 +209,8 @@ namespace ClinicaCentral
                 "FROM medical_records m JOIN patients p ON p.id = m.patient_id " +
                 "LEFT JOIN staff staff_name ON staff_name.full_name = m.doctor " +
                 "LEFT JOIN users u ON u.username = m.doctor " +
-                "LEFT JOIN staff staff_user ON staff_user.user_id = u.id " + where +
+                "LEFT JOIN staff staff_user ON staff_user.user_id = u.id " +
+                "WHERE m.is_deleted = 0 " + where +
                 "ORDER BY m.record_date DESC, m.id DESC", conn);
             if (patientId.HasValue) cmd.Parameters.AddWithValue("@pid", patientId.Value);
             if (doctorName != null) cmd.Parameters.AddWithValue("@doctor", doctorName);

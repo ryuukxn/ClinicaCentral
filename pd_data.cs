@@ -162,7 +162,8 @@ namespace ClinicaCentral
             using var cmd = new MySqlCommand(
                 "SELECT pr.prescription_id, pr.medicine_name, pr.dosage, pr.frequency, pr.duration, mr.record_date " +
                 "FROM prescriptions pr JOIN medical_records mr ON mr.id = pr.medical_record_id " +
-                "WHERE mr.patient_id = @id ORDER BY mr.record_date DESC, pr.prescription_id DESC", conn);
+                "WHERE mr.patient_id = @id AND mr.is_deleted = 0 " +
+                "ORDER BY mr.record_date DESC, pr.prescription_id DESC", conn);
             cmd.Parameters.AddWithValue("@id", patientId);
 
             using var reader = cmd.ExecuteReader();
@@ -194,7 +195,7 @@ namespace ClinicaCentral
             using var conn = OpenConnection();
             using var cmd = new MySqlCommand(
                 "SELECT diagnosis, notes FROM medical_records " +
-                "WHERE patient_id = @id " +
+                "WHERE patient_id = @id AND is_deleted = 0 " +
                 "ORDER BY record_date DESC, id DESC LIMIT 1", conn);
             cmd.Parameters.AddWithValue("@id", patientId);
 

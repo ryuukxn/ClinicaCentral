@@ -102,6 +102,7 @@ namespace ClinicaCentral
                       SELECT mr2.id
                       FROM medical_records mr2
                       WHERE mr2.patient_id = a.patient_id
+                        AND mr2.is_deleted = 0
                         AND (
                             mr2.appointment_id = a.id
                             OR (
@@ -113,6 +114,7 @@ namespace ClinicaCentral
                       ORDER BY mr2.id DESC
                       LIMIT 1
                    )
+                   AND mr.is_deleted = 0
                   LEFT JOIN prescriptions pr ON pr.medical_record_id = mr.id
                   WHERE a.id = @appointmentId
                    AND a.patient_id = @patientId

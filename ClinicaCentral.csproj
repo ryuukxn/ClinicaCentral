@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MySqlBackup.NET.MySqlConnector" Version="2.7.1" />
     <Resource Include="ClinicaCentral_Logo.png" />
     <Resource Include="Clinica_bg.png" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />

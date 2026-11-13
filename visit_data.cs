@@ -92,7 +92,8 @@ namespace ClinicaCentral
 
             using (var cmd = new MySqlCommand(
                 "SELECT diagnosis, notes, follow_up_date FROM medical_records " +
-                "WHERE patient_id = @id AND record_date = @day ORDER BY id DESC LIMIT 1", conn))
+                "WHERE patient_id = @id AND record_date = @day AND is_deleted = 0 " +
+                "ORDER BY id DESC LIMIT 1", conn))
             {
                 cmd.Parameters.AddWithValue("@id", patientId);
                 cmd.Parameters.AddWithValue("@day", appointment.When.Date);
@@ -109,7 +110,8 @@ namespace ClinicaCentral
             using (var cmd = new MySqlCommand(
                 "SELECT pr.medicine_name, pr.dosage, pr.frequency, pr.duration, pr.description " +
                 "FROM prescriptions pr JOIN medical_records mr ON mr.id = pr.medical_record_id " +
-                "WHERE mr.patient_id = @id AND mr.record_date = @day ORDER BY pr.prescription_id", conn))
+                "WHERE mr.patient_id = @id AND mr.record_date = @day AND mr.is_deleted = 0 " +
+                "ORDER BY pr.prescription_id", conn))
             {
                 cmd.Parameters.AddWithValue("@id", patientId);
                 cmd.Parameters.AddWithValue("@day", appointment.When.Date);

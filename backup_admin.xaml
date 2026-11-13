@@ -142,7 +142,7 @@
             <Setter Property="HorizontalAlignment" Value="Left"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Style.Triggers>
-                <DataTrigger Binding="{Binding Status}" Value="Successful">
+                <DataTrigger Binding="{Binding Status}" Value="Success">
                     <Setter Property="Background" Value="#DFF5E6"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Status}" Value="Failed">
@@ -156,7 +156,7 @@
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Foreground" Value="#555555"/>
             <Style.Triggers>
-                <DataTrigger Binding="{Binding Status}" Value="Successful">
+                <DataTrigger Binding="{Binding Status}" Value="Success">
                     <Setter Property="Foreground" Value="#1E8E4E"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Status}" Value="Failed">
@@ -260,7 +260,7 @@
                                     <Border x:Name="LastBadge" Background="#DFF5E6" CornerRadius="11" Padding="16,3"
                                             HorizontalAlignment="Right" VerticalAlignment="Center"
                                             Visibility="Collapsed">
-                                        <TextBlock Text="Successful" FontSize="13" FontWeight="Bold"
+                                        <TextBlock Text="Success" FontSize="13" FontWeight="Bold"
                                                    Foreground="#1E8E4E"/>
                                     </Border>
                                 </Grid>
@@ -337,7 +337,7 @@
                                                             <ColumnDefinition Width="1.6*"/>
                                                         </Grid.ColumnDefinitions>
 
-                                                        <TextBlock Grid.Column="0" Text="{Binding PatientText}" FontSize="15"
+                                                        <TextBlock Grid.Column="0" Text="{Binding Patient}" FontSize="15"
                                                                    FontWeight="Bold" VerticalAlignment="Center"
                                                                    TextTrimming="CharacterEllipsis" Margin="0,0,8,0"/>
                                                         <TextBlock Grid.Column="1" Text="{Binding DeletedBy}" FontSize="15"
@@ -412,16 +412,17 @@
                                                         </Border>
 
                                                         <StackPanel Grid.Column="4" Orientation="Horizontal"
-                                                                    VerticalAlignment="Center"
-                                                                    Visibility="{Binding IsSuccessful, Converter={StaticResource BoolToVis}}">
+                                                                    VerticalAlignment="Center">
                                                             <Button Content="Download" Tag="{Binding}"
                                                                     Style="{StaticResource OutlineButton}"
+                                                                    IsEnabled="{Binding CanRestore}"
                                                                     Click="Download_Click"/>
                                                             <Button Content="Restore" Tag="{Binding}"
                                                                     Style="{StaticResource OutlineButton}"
+                                                                    IsEnabled="{Binding CanRestore}"
+                                                                    ToolTip="Restore is available when the backup succeeded and its file exists."
                                                                     Click="Restore_Click"/>
                                                         </StackPanel>
-                                                        <TextBlock Grid.Column="4" Style="{StaticResource DashText}"/>
                                                     </Grid>
                                                 </Border>
                                             </DataTemplate>
