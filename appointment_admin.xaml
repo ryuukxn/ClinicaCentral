@@ -213,6 +213,8 @@
                     <Button Content="Dashboard"      Tag="&#xE80F;" Style="{StaticResource NavButton}" Click="Dashboard_Click"/>
                     <Button Content="Manage Account" Tag="&#xE77B;" Style="{StaticResource NavButton}" Click="ManageAccount_Click"/>
                     <Button Content="Appointments"   Tag="&#xE787;" Style="{StaticResource NavButtonActive}"/>
+                    <Button Content="Medical Records" Tag="&#xE8A5;" Style="{StaticResource NavButton}" Click="MedicalRecords_Click"/>
+                    <Button Content="Patient Records" Tag="&#xE77B;" Style="{StaticResource NavButton}" Click="PatientRecords_Click"/>
                     <Button Content="Receipts"       Tag="&#xE7C3;" Style="{StaticResource NavButton}" Click="Receipts_Click"/>
                     <Button Content="Backup"         Tag="&#xE895;" Style="{StaticResource NavButton}" Click="Backup_Click"/>
                 </StackPanel>
@@ -288,13 +290,14 @@
                             <ColumnDefinition Width="2.2*"/>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="1.5*"/>
-                            <ColumnDefinition Width="1.6*"/>
+                            <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Date &amp; Time" Style="{StaticResource ColumnHeader}"/>
                         <TextBlock Grid.Column="1" Text="Patient" Style="{StaticResource ColumnHeader}"/>
                         <TextBlock Grid.Column="2" Text="Doctor" Style="{StaticResource ColumnHeader}"/>
                         <TextBlock Grid.Column="3" Text="Status" Style="{StaticResource ColumnHeader}"/>
-                        <TextBlock Grid.Column="4" Text="Action" Style="{StaticResource ColumnHeader}"/>
+                        <TextBlock Grid.Column="4" Text="Action" Style="{StaticResource ColumnHeader}"
+                                   HorizontalAlignment="Center"/>
                     </Grid>
 
                     <Border Grid.Row="3" BorderBrush="#E3E3E3" BorderThickness="0,1,0,0" Margin="0,8,0,0">
@@ -310,7 +313,7 @@
                                                         <ColumnDefinition Width="2.2*"/>
                                                         <ColumnDefinition Width="2*"/>
                                                         <ColumnDefinition Width="1.5*"/>
-                                                        <ColumnDefinition Width="1.6*"/>
+                                                        <ColumnDefinition Width="2*"/>
                                                     </Grid.ColumnDefinitions>
 
                                                     <TextBlock Grid.Column="0" Text="{Binding WhenText}" FontSize="15"
@@ -327,16 +330,16 @@
                                                                    Style="{StaticResource StatusText}"/>
                                                     </Border>
 
-                                                    <StackPanel Grid.Column="4" Orientation="Horizontal"
-                                                                VerticalAlignment="Center">
+                                                    <Grid Grid.Column="4" VerticalAlignment="Center">
                                                         <Button Content="View" Tag="{Binding}"
                                                                 Style="{StaticResource ViewLink}"
-                                                                Margin="0,0,24,0" Click="View_Click"/>
+                                                                HorizontalAlignment="Center" Click="View_Click"/>
                                                         <Button Content="Cancel" Tag="{Binding}"
                                                                 Style="{StaticResource CancelLink}"
+                                                                HorizontalAlignment="Right"
                                                                 Visibility="{Binding CanCancel, Converter={StaticResource BoolToVisibility}}"
                                                                 Click="CancelAppointment_Click"/>
-                                                    </StackPanel>
+                                                    </Grid>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>

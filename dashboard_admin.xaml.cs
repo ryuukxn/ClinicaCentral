@@ -135,6 +135,20 @@ namespace ClinicaCentral
                 return;
             }
 
+            if (page == "Medical Records" && _user is AdminUser admin)
+            {
+                new mr_staff(admin).Open();
+                Close();
+                return;
+            }
+
+            if (page == "Patient Records" && _user is AdminUser patientRecordsAdmin)
+            {
+                new pr_staff(patientRecordsAdmin).Open();
+                Close();
+                return;
+            }
+
             if (page == "Receipts")
             {
                 new receipt_admin(_user).Open();

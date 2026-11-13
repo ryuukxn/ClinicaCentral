@@ -206,6 +206,8 @@
                     <Button Content="Dashboard"      Tag="&#xE80F;" Style="{StaticResource NavButton}" Click="Dashboard_Click"/>
                     <Button Content="Manage Account" Tag="&#xE77B;" Style="{StaticResource NavButton}" Click="ManageAccount_Click"/>
                     <Button Content="Appointments"   Tag="&#xE787;" Style="{StaticResource NavButton}" Click="Appointments_Click"/>
+                    <Button Content="Medical Records" Tag="&#xE8A5;" Style="{StaticResource NavButton}" Click="MedicalRecords_Click"/>
+                    <Button Content="Patient Records" Tag="&#xE77B;" Style="{StaticResource NavButton}" Click="PatientRecords_Click"/>
                     <Button Content="Receipts"       Tag="&#xE7C3;" Style="{StaticResource NavButton}" Click="Receipts_Click"/>
                     <Button Content="Backup"         Tag="&#xE895;" Style="{StaticResource NavButtonActive}"/>
                 </StackPanel>
@@ -304,8 +306,8 @@
 
                     <Border Style="{StaticResource Card}" Margin="0,20,0,0">
                         <StackPanel>
-                            <TextBlock Text="Deleted Patient Records" FontSize="22" FontWeight="ExtraBold"/>
-                            <TextBlock Text="Patient records that staff deleted can be restored here, with their appointments and receipts."
+                            <TextBlock Text="Deleted Medical Records" FontSize="22" FontWeight="ExtraBold"/>
+                            <TextBlock Text="Medical records that were deleted can be reviewed or managed here."
                                        FontSize="13" Foreground="#777777" Margin="0,4,0,0"/>
 
                             <Grid Margin="0,16,0,0">
@@ -354,7 +356,7 @@
                                     </ItemsControl>
 
                                     <TextBlock x:Name="EmptyDeletedText"
-                                               Text="No deleted patient records."
+                                               Text="No deleted medical records."
                                                FontSize="14" Foreground="#888888"
                                                HorizontalAlignment="Center" VerticalAlignment="Top"
                                                Margin="0,24,0,24" Visibility="Collapsed"/>

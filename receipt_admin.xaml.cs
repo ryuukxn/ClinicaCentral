@@ -144,6 +144,32 @@ namespace ClinicaCentral
             Close();
         }
 
+        private void MedicalRecords_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(_user is AdminUser admin))
+            {
+                MessageBox.Show("Only admins can open medical records.", "Access denied",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            new mr_staff(admin).Open();
+            Close();
+        }
+
+        private void PatientRecords_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(_user is AdminUser admin))
+            {
+                MessageBox.Show("Only admins can open patient records.", "Access denied",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            new pr_staff(admin).Open();
+            Close();
+        }
+
         private void NavigationPlaceholder_Click(object sender, RoutedEventArgs e)
         {
         }

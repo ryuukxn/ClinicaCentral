@@ -183,9 +183,9 @@ namespace ClinicaCentral
                 long medicalRecordId;
                 using (var cmd = new MySqlCommand(
                     @"INSERT INTO medical_records
-                        (appointment_id, patient_id, record_date, diagnosis, doctor, notes, bp, temperature, pulse, weight_kg, treatment)
+                        (appointment_id, patient_id, record_date, diagnosis, doctor, notes, bp, temperature, pulse, weight_kg, height, treatment)
                       VALUES
-                        (@appointmentId, @patientId, CURDATE(), @diagnosis, @doctor, @notes, @bp, @temperature, @pulse, @weightKg, @treatment)",
+                        (@appointmentId, @patientId, CURDATE(), @diagnosis, @doctor, @notes, @bp, @temperature, @pulse, @weightKg, @heightCm, @treatment)",
                     conn, transaction))
                 {
                     cmd.Parameters.AddWithValue("@appointmentId", completion.AppointmentId);
@@ -197,6 +197,7 @@ namespace ClinicaCentral
                     cmd.Parameters.AddWithValue("@temperature", DbValue(completion.Temperature));
                     cmd.Parameters.AddWithValue("@pulse", DbValue(completion.Pulse));
                     cmd.Parameters.AddWithValue("@weightKg", DbValue(completion.WeightKg));
+                    cmd.Parameters.AddWithValue("@heightCm", DbValue(completion.HeightCm));
                     cmd.Parameters.AddWithValue("@treatment", DbValue(completion.Treatment));
                     cmd.ExecuteNonQuery();
                     medicalRecordId = cmd.LastInsertedId;
@@ -537,6 +538,7 @@ namespace ClinicaCentral
         public decimal? Temperature { get; set; }
         public int? Pulse { get; set; }
         public decimal? WeightKg { get; set; }
+        public decimal? HeightCm { get; set; }
         public string? Treatment { get; set; }
         public bool NeedsPrescription { get; set; }
         public List<PrescriptionInput> Prescriptions { get; set; } = new List<PrescriptionInput>();

@@ -82,7 +82,7 @@ namespace ClinicaCentral
             using var cmd = new MySqlCommand(
                 @"SELECT mr.id, mr.patient_id, mr.record_date, CONCAT(p.first_name, ' ', p.last_name),
                          mr.diagnosis, COALESCE(s.full_name, mr.doctor), mr.notes, p.birthdate, mr.bp, mr.temperature,
-                         mr.pulse, mr.weight_kg, mr.treatment, mr.attachment_image, mr.attachment_pdf,
+                         mr.pulse, mr.weight_kg, mr.height, mr.treatment, mr.attachment_image, mr.attachment_pdf,
                          pr.prescription_id, pr.medicine_name, pr.dosage, pr.frequency, pr.duration, pr.description
                   FROM appointments a
                   JOIN patients p ON p.id = a.patient_id
@@ -138,22 +138,23 @@ namespace ClinicaCentral
                 Temperature = reader.IsDBNull(9) ? (decimal?)null : Convert.ToDecimal(reader.GetValue(9)),
                 Pulse = reader.IsDBNull(10) ? (int?)null : Convert.ToInt32(reader.GetValue(10)),
                 WeightKg = reader.IsDBNull(11) ? (decimal?)null : Convert.ToDecimal(reader.GetValue(11)),
-                Treatment = reader.IsDBNull(12) ? "" : Convert.ToString(reader.GetValue(12)) ?? "",
-                AttachmentImage = reader.IsDBNull(13) ? "" : Convert.ToString(reader.GetValue(13)) ?? "",
-                AttachmentPdf = reader.IsDBNull(14) ? "" : Convert.ToString(reader.GetValue(14)) ?? ""
+                HeightCm = reader.IsDBNull(12) ? (decimal?)null : Convert.ToDecimal(reader.GetValue(12)),
+                Treatment = reader.IsDBNull(13) ? "" : Convert.ToString(reader.GetValue(13)) ?? "",
+                AttachmentImage = reader.IsDBNull(14) ? "" : Convert.ToString(reader.GetValue(14)) ?? "",
+                AttachmentPdf = reader.IsDBNull(15) ? "" : Convert.ToString(reader.GetValue(15)) ?? ""
             };
 
             do
             {
-                if (!reader.IsDBNull(15))
+                if (!reader.IsDBNull(16))
                 {
                     record.Prescriptions.Add(new PrescriptionLine
                     {
-                        Medicine = Convert.ToString(reader.GetValue(16)) ?? "",
-                        Dosage = reader.IsDBNull(17) ? "" : Convert.ToString(reader.GetValue(17)) ?? "",
-                        Frequency = reader.IsDBNull(18) ? "" : Convert.ToString(reader.GetValue(18)) ?? "",
-                        Duration = reader.IsDBNull(19) ? "" : Convert.ToString(reader.GetValue(19)) ?? "",
-                        Description = reader.IsDBNull(20) ? "" : Convert.ToString(reader.GetValue(20)) ?? ""
+                        Medicine = Convert.ToString(reader.GetValue(17)) ?? "",
+                        Dosage = reader.IsDBNull(18) ? "" : Convert.ToString(reader.GetValue(18)) ?? "",
+                        Frequency = reader.IsDBNull(19) ? "" : Convert.ToString(reader.GetValue(19)) ?? "",
+                        Duration = reader.IsDBNull(20) ? "" : Convert.ToString(reader.GetValue(20)) ?? "",
+                        Description = reader.IsDBNull(21) ? "" : Convert.ToString(reader.GetValue(21)) ?? ""
                     });
                 }
             }

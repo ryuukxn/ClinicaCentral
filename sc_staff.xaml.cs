@@ -334,9 +334,11 @@ namespace ClinicaCentral
 
             decimal? temperature = null;
             decimal? weightKg = null;
+            decimal? heightCm = null;
             int? pulse = null;
             if (!TryReadDecimal(TemperatureInput, "Temperature", 999.9m, out temperature) ||
                 !TryReadDecimal(WeightInput, "Weight", 9999.9m, out weightKg) ||
+                !TryReadDecimal(HeightInput, "Height", 9999.9m, out heightCm) ||
                 !TryReadPulse(out pulse))
                 return;
 
@@ -351,6 +353,7 @@ namespace ClinicaCentral
                 Temperature = temperature,
                 Pulse = pulse,
                 WeightKg = weightKg,
+                HeightCm = heightCm,
                 Treatment = OptionalText(TreatmentInput),
                 NeedsPrescription = needsPrescription,
                 Prescriptions = needsPrescription ? prescriptions : new System.Collections.Generic.List<PrescriptionInput>()
@@ -450,6 +453,7 @@ namespace ClinicaCentral
             TemperatureInput.Clear();
             PulseInput.Clear();
             WeightInput.Clear();
+            HeightInput.Clear();
             TreatmentInput.Clear();
             _prescriptionInputs.Clear();
         }

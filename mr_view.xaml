@@ -121,7 +121,7 @@
 
                 <Border Height="2" Background="#E2E2E2" Margin="0,8,0,10"/>
 
-                <UniformGrid Columns="4">
+                <UniformGrid Columns="5">
                     <Border Style="{StaticResource VitalCard}" Margin="0,0,3,0">
                         <StackPanel>
                             <TextBlock Text="BP" Style="{StaticResource VitalLabel}"/>
@@ -144,6 +144,12 @@
                         <StackPanel>
                             <TextBlock Text="Weight" Style="{StaticResource VitalLabel}"/>
                             <TextBlock Text="{Binding WeightText}" Style="{StaticResource VitalValue}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource VitalCard}">
+                        <StackPanel>
+                            <TextBlock Text="Height" Style="{StaticResource VitalLabel}"/>
+                            <TextBlock Text="{Binding HeightText}" Style="{StaticResource VitalValue}"/>
                         </StackPanel>
                     </Border>
                 </UniformGrid>

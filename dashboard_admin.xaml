@@ -113,6 +113,8 @@
                     <Button Content="Dashboard"      Tag="&#xE80F;" Style="{StaticResource NavButtonActive}"/>
                     <Button Content="Manage Account" Tag="&#xE77B;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
                     <Button Content="Appointments"   Tag="&#xE787;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
+                    <Button Content="Medical Records" Tag="&#xE8A5;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
+                    <Button Content="Patient Records" Tag="&#xE77B;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
                     <Button Content="Receipts"       Tag="&#xE7C3;" Style="{StaticResource NavButton}" Click="Nav_Click"/>
                     <Button Content="Backup"         Tag="&#xE895;" Style="{StaticResource NavButton}" Click="Backup_Click"/>
                 </StackPanel>

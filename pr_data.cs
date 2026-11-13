@@ -18,10 +18,22 @@ namespace ClinicaCentral
         public string Status { get; set; } = "-";
         public DateTime? MemberSince { get; set; }
         public byte[]? Photo { get; set; }
+        public decimal? WeightKg { get; set; }
+        public decimal? HeightCm { get; set; }
+        public DateTime? VitalsRecordDate { get; set; }
 
         public string PatientCode => "Patient Code: " + PatientRow.FormatId(Id);
         public string BirthDateText => FormatDate(BirthDate);
         public string MemberSinceText => "Member since: " + FormatDate(MemberSince);
+        public string WeightText => WeightKg.HasValue
+            ? WeightKg.Value.ToString("0.#", CultureInfo.InvariantCulture) + " kg"
+            : "-";
+        public string HeightText => HeightCm.HasValue
+            ? HeightCm.Value.ToString("0.#", CultureInfo.InvariantCulture) + " cm"
+            : "-";
+        public string VitalsAsOfText => VitalsRecordDate.HasValue
+            ? "As of " + VitalsRecordDate.Value.ToString("MMM d, yyyy", CultureInfo.InvariantCulture)
+            : "No recorded vitals yet";
 
         private static string FormatDate(DateTime? date)
         {
@@ -90,8 +102,12 @@ namespace ClinicaCentral
             using var cmd = conn.CreateCommand();
             cmd.CommandText =
                 "SELECT p.id, p.first_name, p.last_name, p.gender, p.birthdate, p.contact, " +
-                "p.address, p.allergies, u.email, u.status, u.created_at, p.photo " +
+                "p.address, p.allergies, u.email, u.status, u.created_at, p.photo, " +
+                "latest.weight_kg, latest.height, latest.record_date " +
                 "FROM patients p LEFT JOIN users u ON u.patient_id = p.id " +
+                "LEFT JOIN medical_records latest ON latest.id = (" +
+                "SELECT mr.id FROM medical_records mr WHERE mr.patient_id = p.id " +
+                "ORDER BY mr.record_date DESC, mr.id DESC LIMIT 1) " +
                 "WHERE p.id = @patientId LIMIT 1";
             cmd.Parameters.AddWithValue("@patientId", patientId);
 
@@ -114,7 +130,10 @@ namespace ClinicaCentral
                 Email = DisplayValue(Text(reader, 8)),
                 Status = DisplayValue(Text(reader, 9)),
                 MemberSince = reader.IsDBNull(10) ? null : Convert.ToDateTime(reader.GetValue(10)),
-                Photo = photo
+                Photo = photo,
+                WeightKg = reader.IsDBNull(12) ? (decimal?)null : Convert.ToDecimal(reader.GetValue(12)),
+                HeightCm = reader.IsDBNull(13) ? (decimal?)null : Convert.ToDecimal(reader.GetValue(13)),
+                VitalsRecordDate = reader.IsDBNull(14) ? (DateTime?)null : Convert.ToDateTime(reader.GetValue(14))
             };
         }
 

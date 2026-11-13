@@ -461,6 +461,7 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Margin="0,0,8,0">
                                     <TextBlock Text="Pulse" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
@@ -472,6 +473,12 @@
                                     <TextBlock Text="Weight (kg)" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
                                     <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
                                         <TextBox x:Name="WeightInput" BorderThickness="0" Padding="2,6"/>
+                                    </Border>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Margin="8,0,0,0">
+                                    <TextBlock Text="Height (cm)" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
+                                        <TextBox x:Name="HeightInput" BorderThickness="0" Padding="2,6"/>
                                     </Border>
                                 </StackPanel>
                             </Grid>

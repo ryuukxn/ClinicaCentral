@@ -22,6 +22,8 @@ namespace ClinicaCentral
         public decimal? Temperature { get; set; }
         public int? Pulse { get; set; }
         public decimal? WeightKg { get; set; }
+        public decimal? HeightCm { get; set; }
+        public bool CanDelete { get; set; }
         public string AttachmentImage { get; set; } = "";
         public string AttachmentPdf { get; set; } = "";
         public List<PrescriptionLine> Prescriptions { get; } = new List<PrescriptionLine>();
@@ -140,6 +142,16 @@ namespace ClinicaCentral
             }
         }
 
+        public string HeightText
+        {
+            get
+            {
+                return HeightCm == null
+                    ? Dash
+                    : HeightCm.Value.ToString("0.#", CultureInfo.InvariantCulture) + " cm";
+            }
+        }
+
         public string ImageFileText
         {
             get { return AttachmentImage.Length == 0 ? "No image" : AttachmentImage; }
@@ -151,73 +163,14 @@ namespace ClinicaCentral
         }
     }
 
-    public class PagedList<T>
-    {
-        private readonly List<T> _items = new List<T>();
-
-        public int PageSize { get; }
-        public int PageNumber { get; private set; } = 1;
-
-        public PagedList(int pageSize)
-        {
-            PageSize = Math.Max(1, pageSize);
-        }
-
-        public int TotalItems
-        {
-            get { return _items.Count; }
-        }
-
-        public int TotalPages
-        {
-            get { return Math.Max(1, (int)Math.Ceiling(_items.Count / (double)PageSize)); }
-        }
-
-        public bool HasPrevious
-        {
-            get { return PageNumber > 1; }
-        }
-
-        public bool HasNext
-        {
-            get { return PageNumber < TotalPages; }
-        }
-
-        public void Load(IEnumerable<T> items)
-        {
-            _items.Clear();
-            _items.AddRange(items);
-            PageNumber = 1;
-        }
-
-        public void GoTo(int page)
-        {
-            PageNumber = Math.Min(Math.Max(1, page), TotalPages);
-        }
-
-        public void Next()
-        {
-            GoTo(PageNumber + 1);
-        }
-
-        public void Previous()
-        {
-            GoTo(PageNumber - 1);
-        }
-
-        public List<T> GetCurrentPage()
-        {
-            int start = (PageNumber - 1) * PageSize;
-            int count = Math.Min(PageSize, _items.Count - start);
-
-            if (count <= 0) return new List<T>();
-            return _items.GetRange(start, count);
-        }
-    }
-
     public class MedicalRecordRepository : Repository
     {
         public MedicalRecordRepository(DatabaseConnection db) : base(db) { }
+
+        public List<MedicalRecordRow> GetAll()
+        {
+            return Query("", null, null);
+        }
 
         public List<MedicalRecordRow> GetForDoctor(string doctorName)
         {
@@ -237,7 +190,7 @@ namespace ClinicaCentral
             using var cmd = new MySqlCommand(
                 "SELECT m.id, m.patient_id, m.record_date, CONCAT(p.first_name, ' ', p.last_name), " +
                 "m.diagnosis, COALESCE(staff_name.full_name, staff_user.full_name, m.doctor), m.notes, " +
-                "p.birthdate, m.bp, m.temperature, m.pulse, m.weight_kg, " +
+                "p.birthdate, m.bp, m.temperature, m.pulse, m.weight_kg, m.height, " +
                 "m.treatment, m.attachment_image, m.attachment_pdf " +
                 "FROM medical_records m JOIN patients p ON p.id = m.patient_id " +
                 "LEFT JOIN staff staff_name ON staff_name.full_name = m.doctor " +
@@ -263,9 +216,10 @@ namespace ClinicaCentral
                 item.Temperature = reader.IsDBNull(9) ? (decimal?)null : Convert.ToDecimal(reader.GetValue(9));
                 item.Pulse = reader.IsDBNull(10) ? (int?)null : Convert.ToInt32(reader.GetValue(10));
                 item.WeightKg = reader.IsDBNull(11) ? (decimal?)null : Convert.ToDecimal(reader.GetValue(11));
-                item.Treatment = Text(reader, 12);
-                item.AttachmentImage = Text(reader, 13);
-                item.AttachmentPdf = Text(reader, 14);
+                item.HeightCm = reader.IsDBNull(12) ? (decimal?)null : Convert.ToDecimal(reader.GetValue(12));
+                item.Treatment = Text(reader, 13);
+                item.AttachmentImage = Text(reader, 14);
+                item.AttachmentPdf = Text(reader, 15);
                 list.Add(item);
             }
             return list;

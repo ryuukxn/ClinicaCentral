@@ -6,23 +6,30 @@ namespace ClinicaCentral
 {
     public partial class mr_staff : Window
     {
-        private const int PageSize = 5;
-
         private readonly string _displayName;
+        private readonly AdminUser? _adminUser;
         private readonly MedicalRecordRepository _records;
-        private readonly PagedList<MedicalRecordRow> _pages = new PagedList<MedicalRecordRow>(PageSize);
         private readonly System.Collections.Generic.List<MedicalRecordRow> _all =
             new System.Collections.Generic.List<MedicalRecordRow>();
 
-        public mr_staff() : this("Doctor") { }
+        public mr_staff() : this("Doctor", null) { }
 
-        public mr_staff(string displayName)
+        public mr_staff(string displayName) : this(displayName, null) { }
+
+        public mr_staff(AdminUser user) : this(user.Username, user) { }
+
+        private mr_staff(string displayName, AdminUser? adminUser)
         {
             InitializeComponent();
 
             _records = new MedicalRecordRepository(new DatabaseConnection());
             _displayName = displayName;
-            WelcomeText.Text = $"Welcome back, {displayName}!";
+            _adminUser = adminUser;
+            WelcomeText.Text = _adminUser == null
+                ? $"Welcome back, {displayName}!"
+                : _adminUser.GetWelcomeMessage();
+            StaffNavigationPanel.Visibility = _adminUser == null ? Visibility.Visible : Visibility.Collapsed;
+            AdminNavigationPanel.Visibility = _adminUser == null ? Visibility.Collapsed : Visibility.Visible;
             Loaded += (s, e) => LoadRecords();
         }
 
@@ -31,9 +38,14 @@ namespace ClinicaCentral
             try
             {
                 _all.Clear();
-                _all.AddRange(_records.GetForDoctor(_displayName));
-                _pages.Load(_all);
-                ShowPage();
+                _all.AddRange(_adminUser == null
+                    ? _records.GetForDoctor(_displayName)
+                    : _records.GetAll());
+                foreach (MedicalRecordRow record in _all)
+                    record.CanDelete = _adminUser != null;
+
+                RecordList.ItemsSource = _all;
+                EmptyText.Visibility = _all.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             }
             catch (Exception ex)
             {
@@ -41,58 +53,6 @@ namespace ClinicaCentral
                     "The medical records could not be loaded. Make sure MySQL is running in Laragon and that medical_records.sql and medical_records_details.sql were both run.\n\n" + ex.Message,
                     "Connection problem", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
-        }
-
-        private void ShowPage()
-        {
-            var rows = _pages.GetCurrentPage();
-
-            RecordList.ItemsSource = rows;
-            EmptyText.Visibility = _all.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-            BuildPager();
-        }
-
-        private void BuildPager()
-        {
-            PagerPanel.Children.Clear();
-
-            if (_all.Count == 0) return;
-
-            PagerPanel.Children.Add(MakePagerButton("\u2039", "prev", false, _pages.HasPrevious));
-
-            int first = Math.Max(1, _pages.PageNumber - 2);
-            int last = Math.Min(_pages.TotalPages, first + 4);
-            first = Math.Max(1, last - 4);
-
-            for (int page = first; page <= last; page++)
-                PagerPanel.Children.Add(MakePagerButton(page.ToString(), page, page == _pages.PageNumber, true));
-
-            PagerPanel.Children.Add(MakePagerButton("\u203A", "next", false, _pages.HasNext));
-        }
-
-        private Button MakePagerButton(string text, object tag, bool active, bool enabled)
-        {
-            Button button = new Button();
-            button.Content = text;
-            button.Tag = tag;
-            button.IsEnabled = enabled;
-            button.Style = (Style)FindResource(active ? "PageButtonActive" : "PageButton");
-            button.Click += Page_Click;
-            return button;
-        }
-
-        private void Page_Click(object sender, RoutedEventArgs e)
-        {
-            if (!(sender is Button button)) return;
-
-            if (button.Tag is int page)
-                _pages.GoTo(page);
-            else if (button.Tag as string == "prev")
-                _pages.Previous();
-            else if (button.Tag as string == "next")
-                _pages.Next();
-
-            ShowPage();
         }
 
         private void View_Click(object sender, RoutedEventArgs e)
@@ -105,6 +65,31 @@ namespace ClinicaCentral
             mr_view window = new mr_view(record);
             window.Owner = this;
             window.ShowDialog();
+        }
+
+        private void Delete_Click(object sender, RoutedEventArgs e) { }
+
+        private void AdminNav_Click(object sender, RoutedEventArgs e)
+        {
+            if (_adminUser == null) return;
+
+            string page = (sender as Button)?.Tag as string ?? "";
+            if (page == "Dashboard")
+                new dashboard_admin(_adminUser).Open();
+            else if (page == "Manage Account")
+                new ma_admin(_adminUser).Open();
+            else if (page == "Appointments")
+                new appointment_admin(_adminUser).Open();
+            else if (page == "Patient Records")
+                new pr_staff(_adminUser).Open();
+            else if (page == "Receipts")
+                new receipt_admin(_adminUser).Open();
+            else if (page == "Backup")
+                new backup_admin(_adminUser).Open();
+            else
+                return;
+
+            Close();
         }
 
         private void Nav_Click(object sender, RoutedEventArgs e)

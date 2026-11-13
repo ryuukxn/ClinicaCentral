@@ -12,18 +12,28 @@ namespace ClinicaCentral
         private const string DefaultEmptyMessage = "No patient records yet.";
 
         private readonly string _displayName;
+        private readonly AdminUser? _adminUser;
         private readonly PatientRepository _patients;
         private readonly PatientDirectory _directory = new PatientDirectory();
 
-        public pr_staff() : this("Doctor") { }
+        public pr_staff() : this("Doctor", null) { }
 
-        public pr_staff(string displayName)
+        public pr_staff(string displayName) : this(displayName, null) { }
+
+        public pr_staff(AdminUser user) : this(user.Username, user) { }
+
+        private pr_staff(string displayName, AdminUser? adminUser)
         {
             InitializeComponent();
 
             _patients = new PatientRepository(new DatabaseConnection());
             _displayName = displayName;
-            WelcomeText.Text = $"Welcome back, {displayName}!";
+            _adminUser = adminUser;
+            WelcomeText.Text = _adminUser == null
+                ? $"Welcome back, {displayName}!"
+                : _adminUser.GetWelcomeMessage();
+            StaffNavigationPanel.Visibility = _adminUser == null ? Visibility.Visible : Visibility.Collapsed;
+            AdminNavigationPanel.Visibility = _adminUser == null ? Visibility.Collapsed : Visibility.Visible;
             Loaded += (s, e) => LoadPatients();
         }
 
@@ -191,6 +201,29 @@ namespace ClinicaCentral
                 return;
             }
 
+        }
+
+        private void AdminNav_Click(object sender, RoutedEventArgs e)
+        {
+            if (_adminUser == null) return;
+
+            string page = (sender as Button)?.Tag as string ?? "";
+            if (page == "Dashboard")
+                new dashboard_admin(_adminUser).Open();
+            else if (page == "Manage Account")
+                new ma_admin(_adminUser).Open();
+            else if (page == "Appointments")
+                new appointment_admin(_adminUser).Open();
+            else if (page == "Medical Records")
+                new mr_staff(_adminUser).Open();
+            else if (page == "Receipts")
+                new receipt_admin(_adminUser).Open();
+            else if (page == "Backup")
+                new backup_admin(_adminUser).Open();
+            else
+                return;
+
+            Close();
         }
 
         private void Logout_Click(object sender, RoutedEventArgs e)
