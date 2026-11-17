@@ -119,32 +119,20 @@
             <Setter Property="Foreground" Value="#7C8BA1"/>
         </Style>
 
-        <Style x:Key="ViewLink" TargetType="Button">
-            <Setter Property="Foreground" Value="#2B6CD8"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="Bold"/>
+        <Style x:Key="ViewButton" TargetType="Button">
+            <Setter Property="Background" Value="#3F6FD0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="FontSize" Value="11"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <TextBlock Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"
-                                   FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}"
-                                   TextDecorations="Underline"/>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="CancelLink" TargetType="Button">
-            <Setter Property="Foreground" Value="#B72A2A"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <TextBlock Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"
-                                   FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}"/>
+                        <Border Background="{TemplateBinding Background}" CornerRadius="5"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -296,13 +284,13 @@
                             <ColumnDefinition Width="2.2*"/>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="1.5*"/>
-                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="80"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Date &amp; Time" Style="{StaticResource ColumnHeader}"/>
                         <TextBlock Grid.Column="1" Text="Patient" Style="{StaticResource ColumnHeader}"/>
                         <TextBlock Grid.Column="2" Text="Doctor" Style="{StaticResource ColumnHeader}"/>
                         <TextBlock Grid.Column="3" Text="Status" Style="{StaticResource ColumnHeader}"/>
-                        <TextBlock Grid.Column="4" Text="Action" Style="{StaticResource ColumnHeader}"
+                        <TextBlock Grid.Column="4" Text="Details" Style="{StaticResource ColumnHeader}"
                                    HorizontalAlignment="Center"/>
                     </Grid>
 
@@ -319,7 +307,7 @@
                                                         <ColumnDefinition Width="2.2*"/>
                                                         <ColumnDefinition Width="2*"/>
                                                         <ColumnDefinition Width="1.5*"/>
-                                                        <ColumnDefinition Width="2*"/>
+                                                        <ColumnDefinition Width="80"/>
                                                     </Grid.ColumnDefinitions>
 
                                                     <TextBlock Grid.Column="0" Text="{Binding WhenText}" FontSize="15"
@@ -336,16 +324,9 @@
                                                                    Style="{StaticResource StatusText}"/>
                                                     </Border>
 
-                                                    <Grid Grid.Column="4" VerticalAlignment="Center">
-                                                        <Button Content="View" Tag="{Binding}"
-                                                                Style="{StaticResource ViewLink}"
-                                                                HorizontalAlignment="Center" Click="View_Click"/>
-                                                        <Button Content="Cancel" Tag="{Binding}"
-                                                                Style="{StaticResource CancelLink}"
-                                                                HorizontalAlignment="Right"
-                                                                Visibility="{Binding CanCancel, Converter={StaticResource BoolToVisibility}}"
-                                                                Click="CancelAppointment_Click"/>
-                                                    </Grid>
+                                                    <Button Grid.Column="4" Content="View" Tag="{Binding}"
+                                                            Style="{StaticResource ViewButton}" Width="48" Height="24"
+                                                            HorizontalAlignment="Center" Click="View_Click"/>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>

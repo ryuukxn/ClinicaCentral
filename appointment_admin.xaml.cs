@@ -9,6 +9,7 @@ namespace ClinicaCentral
     {
         private readonly User _user;
         private readonly AppointmentRepository _appointments;
+        private readonly AppointmentDetailsRepository _appointmentDetails;
         private readonly List<AppointmentRecord> _all = new List<AppointmentRecord>();
         private string _activeFilter = "All";
 
@@ -17,7 +18,9 @@ namespace ClinicaCentral
             InitializeComponent();
 
             _user = user;
-            _appointments = new AppointmentRepository(new DatabaseConnection());
+            DatabaseConnection db = new DatabaseConnection();
+            _appointments = new AppointmentRepository(db);
+            _appointmentDetails = new AppointmentDetailsRepository(db);
 
             lblWelcome.Text = _user.GetWelcomeMessage();
             Loaded += (s, e) => LoadAppointments();
@@ -117,16 +120,29 @@ namespace ClinicaCentral
         {
             if (!(sender is Button button) || !(button.Tag is AppointmentRecord item)) return;
 
-            MessageBox.Show(
-                "Patient:   " + item.Patient + "\n" +
-                "Doctor:    " + item.DoctorText + "\n" +
-                "When:      " + item.WhenText + "\n" +
-                "Status:    " + item.Status,
-                "Appointment details", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+            try
+            {
+                AppointmentDetails? details = _appointmentDetails.GetForAdmin(item.Id, _user.Username);
+                if (details == null)
+                {
+                    MessageBox.Show("This appointment could not be found or your account cannot view it.",
+                        "Appointment unavailable", MessageBoxButton.OK, MessageBoxImage.Information);
+                    LoadAppointments();
+                    return;
+                }
 
-        private void CancelAppointment_Click(object sender, RoutedEventArgs e)
-        {
+                var dialog = new AppointmentDetailsWindow(details, false, null)
+                {
+                    Owner = this
+                };
+                dialog.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Could not load this appointment. Please check your database connection and try again.\n\n" + ex.Message,
+                    "Appointment error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void Dashboard_Click(object sender, RoutedEventArgs e)

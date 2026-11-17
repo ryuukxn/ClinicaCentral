@@ -1,0 +1,97 @@
+<Window x:Class="ClinicaCentral.AppointmentDetailsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Appointment Details" Height="610" Width="520"
+        MinHeight="500" MinWidth="460" ResizeMode="CanResize"
+        WindowStartupLocation="CenterOwner" Background="#E8E8E8"
+        FontFamily="Segoe UI" ShowInTaskbar="False">
+    <Window.Resources>
+        <Style x:Key="DetailLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#666"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,3"/>
+        </Style>
+        <Style x:Key="DetailValue" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#222"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Appointment Details" FontSize="21" FontWeight="Bold"
+                   Foreground="#263A5B" Margin="0,0,0,16"/>
+
+        <Border Grid.Row="1" Background="White" BorderBrush="#D9E1EC" BorderThickness="1"
+                CornerRadius="8" Padding="18">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock Text="Patient name" Style="{StaticResource DetailLabel}"/>
+                    <TextBlock x:Name="PatientNameText" Style="{StaticResource DetailValue}" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Patient ID" Style="{StaticResource DetailLabel}"/>
+                    <TextBlock x:Name="PatientIdText" Style="{StaticResource DetailValue}" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Contact number" Style="{StaticResource DetailLabel}"/>
+                    <TextBlock x:Name="ContactText" Style="{StaticResource DetailValue}" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Email" Style="{StaticResource DetailLabel}"/>
+                    <TextBlock x:Name="EmailText" Style="{StaticResource DetailValue}" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Appointment date" Style="{StaticResource DetailLabel}"/>
+                    <TextBlock x:Name="AppointmentDateText" Style="{StaticResource DetailValue}" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Appointment time" Style="{StaticResource DetailLabel}"/>
+                    <TextBlock x:Name="AppointmentTimeText" Style="{StaticResource DetailValue}" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Reason / notes" Style="{StaticResource DetailLabel}"/>
+                    <TextBlock x:Name="NotesText" Style="{StaticResource DetailValue}" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Current status" Style="{StaticResource DetailLabel}"/>
+                    <TextBlock x:Name="StatusText" Style="{StaticResource DetailValue}" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Attachment" Style="{StaticResource DetailLabel}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <Border x:Name="AttachmentBox" Width="140" Height="100" Background="#F1F3F6"
+                                BorderBrush="#CBD3DF" BorderThickness="1" CornerRadius="5"
+                                ClipToBounds="True" Cursor="Arrow" MouseLeftButtonUp="Attachment_Click">
+                            <Grid>
+                                <TextBlock x:Name="NoAttachmentText" Text="No attachment"
+                                           Foreground="#777" FontSize="12"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Image x:Name="AttachmentImage" Stretch="UniformToFill"
+                                       Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center" Margin="12,0,0,0">
+                            <TextBlock x:Name="AttachmentFileNameText" Style="{StaticResource DetailValue}"
+                                       MaxWidth="230" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock x:Name="AttachmentUploadedAtText" Foreground="#777" FontSize="12"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button x:Name="ConfirmButton" Content="Confirm Appointment" Style="{StaticResource ActionButton}"
+                    Background="#3F6FD0" Foreground="White" BorderThickness="0" Margin="0,0,8,0"
+                    Click="ConfirmButton_Click"/>
+            <Button Content="Close" Style="{StaticResource ActionButton}" Background="White"
+                    Foreground="#333" BorderBrush="#BFC8D6" Click="CloseButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

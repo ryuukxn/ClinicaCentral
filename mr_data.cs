@@ -157,10 +157,6 @@ namespace ClinicaCentral
             get { return AttachmentImage.Length == 0 ? "No image" : AttachmentImage; }
         }
 
-        public string PdfFileText
-        {
-            get { return AttachmentPdf.Length == 0 ? "No file" : AttachmentPdf; }
-        }
     }
 
     public class MedicalRecordRepository : Repository
@@ -205,7 +201,7 @@ namespace ClinicaCentral
                 "SELECT m.id, m.patient_id, m.record_date, CONCAT(p.first_name, ' ', p.last_name), " +
                 "m.diagnosis, COALESCE(staff_name.full_name, staff_user.full_name, m.doctor), m.notes, " +
                 "p.birthdate, m.bp, m.temperature, m.pulse, m.weight_kg, m.height, " +
-                "m.treatment, m.attachment_image, m.attachment_pdf " +
+                "m.treatment, m.attachment_image " +
                 "FROM medical_records m JOIN patients p ON p.id = m.patient_id " +
                 "LEFT JOIN staff staff_name ON staff_name.full_name = m.doctor " +
                 "LEFT JOIN users u ON u.username = m.doctor " +
@@ -234,7 +230,6 @@ namespace ClinicaCentral
                 item.HeightCm = reader.IsDBNull(12) ? (decimal?)null : Convert.ToDecimal(reader.GetValue(12));
                 item.Treatment = Text(reader, 13);
                 item.AttachmentImage = Text(reader, 14);
-                item.AttachmentPdf = Text(reader, 15);
                 list.Add(item);
             }
             return list;

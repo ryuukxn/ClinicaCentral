@@ -100,6 +100,25 @@
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
+
+        <Style x:Key="ViewButton" TargetType="Button">
+            <Setter Property="Background" Value="#3F6FD0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="5"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -308,30 +327,37 @@
                             <TextBlock DockPanel.Dock="Top" Text="Recent Patients" Style="{StaticResource CardTitle}"/>
                             <Grid DockPanel.Dock="Top" Margin="0,0,0,6">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="110"/>
+                                    <ColumnDefinition Width="85"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="62"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="Time" Style="{StaticResource ColHeader}"/>
                                 <TextBlock Grid.Column="1" Text="Patient Name" Style="{StaticResource ColHeader}"/>
                                 <TextBlock Grid.Column="2" Text="Status" Style="{StaticResource ColHeader}"/>
+                                <TextBlock Grid.Column="3" Text="Details" Style="{StaticResource ColHeader}"
+                                           HorizontalAlignment="Center"/>
                             </Grid>
                             <TextBlock x:Name="RecentEmpty" DockPanel.Dock="Bottom" Visibility="Collapsed"
                                        Text="No recent patients yet." Foreground="#777" Margin="0,8,0,0"/>
-                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,2,0,0" ClipToBounds="True">
                                 <ItemsControl x:Name="RecentList">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Border BorderBrush="#E2E2E2" BorderThickness="0,1,0,0" Padding="0,6">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="110"/>
+                                                        <ColumnDefinition Width="85"/>
                                                         <ColumnDefinition Width="*"/>
                                                         <ColumnDefinition Width="100"/>
+                                                        <ColumnDefinition Width="62"/>
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Grid.Column="0" Text="{Binding Time}" Style="{StaticResource Cell}"/>
                                                     <TextBlock Grid.Column="1" Text="{Binding PatientName}" Style="{StaticResource Cell}"/>
                                                     <TextBlock Grid.Column="2" Text="{Binding Status}" Style="{StaticResource StatusCell}"/>
+                                                    <Button Grid.Column="3" Content="View" Width="48" Height="24"
+                                                            Style="{StaticResource ViewButton}" HorizontalAlignment="Center"
+                                                            Click="ViewAppointment_Click"/>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>

@@ -11,6 +11,7 @@ namespace ClinicaCentral
         private readonly PatientQueue _waitingQueue = new PatientQueue();
         private readonly StatsRepository _stats;
         private readonly DashboardRepository _dashboard;
+        private readonly AppointmentDetailsRepository _appointmentDetails;
         private readonly string _displayName;
 
         public dashboard_staff() : this("Doctor") { }
@@ -22,6 +23,7 @@ namespace ClinicaCentral
             DatabaseConnection db = new DatabaseConnection();
             _stats = new StatsRepository(db);
             _dashboard = new DashboardRepository(db);
+            _appointmentDetails = new AppointmentDetailsRepository(db);
 
             _displayName = displayName;
             WelcomeText.Text = $"Welcome back, {displayName}!";
@@ -55,6 +57,44 @@ namespace ClinicaCentral
                 MessageBox.Show(
                     "The dashboard could not load its data. Make sure MySQL is running in Laragon.\n\n" + ex.Message,
                     "Connection problem", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void ViewAppointment_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is Button button) || !(button.DataContext is RecentPatientRow row))
+                return;
+
+            try
+            {
+                AppointmentDetails? details = _appointmentDetails.GetForDoctor(row.AppointmentId, _displayName);
+                if (details == null)
+                {
+                    MessageBox.Show(
+                        "This appointment could not be found or is no longer assigned to your account.",
+                        "Appointment unavailable", MessageBoxButton.OK, MessageBoxImage.Information);
+                    LoadDashboard();
+                    return;
+                }
+
+                var dialog = new AppointmentDetailsWindow(details, true,
+                    id => _appointmentDetails.ConfirmForDoctor(id, _displayName))
+                {
+                    Owner = this
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    MessageBox.Show("Appointment confirmed successfully.", "Appointment confirmed",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    LoadDashboard();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Could not load this appointment. Please check your database connection and try again.\n\n" + ex.Message,
+                    "Appointment error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 

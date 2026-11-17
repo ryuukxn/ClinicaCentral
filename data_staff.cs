@@ -22,7 +22,7 @@ namespace ClinicaCentral
 
     public class RecentPatientRow
     {
-        public int Id { get; set; }
+        public int AppointmentId { get; set; }
         public string Time { get; set; } = "";
         public string PatientName { get; set; } = "";
         public string Status { get; set; } = "";
@@ -84,10 +84,9 @@ namespace ClinicaCentral
                 "SELECT TIME_FORMAT(a.appointment_date, '%h:%i %p'), CONCAT(p.first_name, ' ', p.last_name), a.status " +
                 "FROM appointments a JOIN patients p ON p.id = a.patient_id " +
                 "JOIN users login_user ON login_user.username = @username " +
-                "JOIN staff current_doctor ON current_doctor.user_id = login_user.id " +
+                "JOIN staff current_doctor ON current_doctor.user_id = login_user.id AND current_doctor.position = 'Doctor' " +
                 "WHERE DATE(a.appointment_date) = CURDATE() " +
-                "AND (current_doctor.position <> 'Doctor' OR a.staff_id = current_doctor.id " +
-                "OR a.doctor = current_doctor.full_name) " +
+                "AND a.staff_id = current_doctor.id " +
                 "ORDER BY a.appointment_date", conn);
             cmd.Parameters.AddWithValue("@username", username);
 
@@ -116,10 +115,9 @@ namespace ClinicaCentral
                 "SELECT p.id, CONCAT(p.first_name, ' ', p.last_name) " +
                 "FROM appointments a JOIN patients p ON p.id = a.patient_id " +
                 "JOIN users login_user ON login_user.username = @username " +
-                "JOIN staff current_doctor ON current_doctor.user_id = login_user.id " +
+                "JOIN staff current_doctor ON current_doctor.user_id = login_user.id AND current_doctor.position = 'Doctor' " +
                 "WHERE DATE(a.appointment_date) = CURDATE() AND a.status = 'Confirmed' " +
-                "AND (current_doctor.position <> 'Doctor' OR a.staff_id = current_doctor.id " +
-                "OR a.doctor = current_doctor.full_name) " +
+                "AND a.staff_id = current_doctor.id " +
                 "ORDER BY a.appointment_date", conn);
             cmd.Parameters.AddWithValue("@username", username);
 
@@ -141,16 +139,11 @@ namespace ClinicaCentral
 
             using var conn = OpenConnection();
             using var cmd = new MySqlCommand(
-                "SELECT p.id, TIME_FORMAT(a.appointment_date, '%h:%i %p'), CONCAT(p.first_name, ' ', p.last_name), a.status " +
-                "FROM patients p " +
+                "SELECT a.id, TIME_FORMAT(a.appointment_date, '%h:%i %p'), CONCAT(p.first_name, ' ', p.last_name), a.status " +
+                "FROM appointments a JOIN patients p ON p.id = a.patient_id " +
                 "JOIN users login_user ON login_user.username = @username " +
-                "JOIN staff current_doctor ON current_doctor.user_id = login_user.id " +
-                "JOIN appointments a ON a.id = (SELECT a2.id FROM appointments a2 " +
-                "                               WHERE a2.patient_id = p.id " +
-                "                               AND (current_doctor.position <> 'Doctor' " +
-                "                                    OR a2.staff_id = current_doctor.id " +
-                "                                    OR a2.doctor = current_doctor.full_name) " +
-                "                               ORDER BY a2.appointment_date DESC LIMIT 1) " +
+                "JOIN staff current_doctor ON current_doctor.user_id = login_user.id AND current_doctor.position = 'Doctor' " +
+                "WHERE a.staff_id = current_doctor.id " +
                 "ORDER BY a.appointment_date DESC " +
                 "LIMIT @count", conn);
             cmd.Parameters.AddWithValue("@username", username);
@@ -161,7 +154,7 @@ namespace ClinicaCentral
             {
                 list.Add(new RecentPatientRow
                 {
-                    Id = Convert.ToInt32(reader.GetValue(0)),
+                    AppointmentId = Convert.ToInt32(reader.GetValue(0)),
                     Time = Convert.ToString(reader.GetValue(1)) ?? "",
                     PatientName = Convert.ToString(reader.GetValue(2)) ?? "",
                     Status = Convert.ToString(reader.GetValue(3)) ?? ""

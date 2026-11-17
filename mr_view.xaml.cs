@@ -37,8 +37,12 @@ namespace ClinicaCentral
                 ImageBox.Cursor = Cursors.Hand;
                 ImageBox.ToolTip = "Click to view full size";
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                ImageCaption.Text = "Image unavailable";
+                MessageBox.Show(
+                    "The patient image could not be loaded. It may have been removed or the database may be unavailable.\n\n" + ex.Message,
+                    "Attachment unavailable", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
