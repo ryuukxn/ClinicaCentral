@@ -66,15 +66,16 @@ namespace ClinicaCentral
                 using var conn = Database.GetConnection();
                 conn.Open();
 
-                string query = "SELECT full_name FROM staff WHERE status = 'On Duty' AND position = 'Doctor' ORDER BY full_name ASC";
+                string query = "SELECT id, full_name FROM staff WHERE status = 'On Duty' AND position = 'Doctor' ORDER BY full_name ASC";
                 
                 using var cmd = new MySqlCommand(query, conn);
                 using var reader = cmd.ExecuteReader();
 
                 while (reader.Read())
                 {
-                    string doctorName = reader.GetString(0);
-                    doctors.Add(new DoctorOption { IsPlaceholder = false, Name = doctorName });
+                    int doctorId = Convert.ToInt32(reader.GetValue(0));
+                    string doctorName = reader.GetString(1);
+                    doctors.Add(new DoctorOption { IsPlaceholder = false, Id = doctorId, Name = doctorName });
                 }
             }
             catch (Exception ex)
@@ -358,17 +359,7 @@ namespace ClinicaCentral
                 using var conn = Database.GetConnection();
                 conn.Open();
 
-                int staffId = 0;
-                string getStaffIdQuery = "SELECT id FROM staff WHERE full_name = @docName AND position = 'Doctor' LIMIT 1";
-                using (var cmdStaff = new MySqlCommand(getStaffIdQuery, conn))
-                {
-                    cmdStaff.Parameters.AddWithValue("@docName", doctor.Name);
-                    var result = cmdStaff.ExecuteScalar();
-                    if (result != null)
-                    {
-                        staffId = Convert.ToInt32(result);
-                    }
-                }
+                int staffId = doctor.Id;
 
                 if (staffId <= 0)
                 {
