@@ -43,7 +43,10 @@ namespace ClinicaCentral
             {
                 _directory.Clear();
 
-                foreach (var patient in _patients.GetAll())
+                List<PatientRow> patients = _adminUser != null
+                    ? _patients.GetAll()
+                    : _patients.GetForDoctor(_displayName);
+                foreach (var patient in patients)
                     _directory.Add(patient);
 
                 ShowRows(_directory.GetAll(), DefaultEmptyMessage);
@@ -115,7 +118,9 @@ namespace ClinicaCentral
 
             try
             {
-                PatientProfileRow? profile = _patients.GetPatientProfile(id);
+                PatientProfileRow? profile = _adminUser != null
+                    ? _patients.GetPatientProfile(id)
+                    : _patients.GetPatientProfileForStaff(id, _displayName);
                 if (profile == null)
                 {
                     MessageBox.Show("The selected patient profile could not be found.",

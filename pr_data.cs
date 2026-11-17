@@ -98,6 +98,16 @@ namespace ClinicaCentral
 
         public PatientProfileRow? GetPatientProfile(int patientId)
         {
+            return GetPatientProfile(patientId, null);
+        }
+
+        public PatientProfileRow? GetPatientProfileForStaff(int patientId, string username)
+        {
+            return GetPatientProfile(patientId, username);
+        }
+
+        private PatientProfileRow? GetPatientProfile(int patientId, string? staffUsername)
+        {
             using var conn = OpenConnection();
             using var cmd = conn.CreateCommand();
             cmd.CommandText =
@@ -108,8 +118,19 @@ namespace ClinicaCentral
                 "LEFT JOIN medical_records latest ON latest.id = (" +
                 "SELECT mr.id FROM medical_records mr WHERE mr.patient_id = p.id AND mr.is_deleted = 0 " +
                 "ORDER BY mr.record_date DESC, mr.id DESC LIMIT 1) " +
-                "WHERE p.id = @patientId LIMIT 1";
+                "WHERE p.id = @patientId " +
+                (staffUsername == null ? "" :
+                    "AND EXISTS (" +
+                    "SELECT 1 FROM users login_user " +
+                    "JOIN staff current_staff ON current_staff.user_id = login_user.id " +
+                    "WHERE login_user.username = @username " +
+                    "AND (current_staff.position <> 'Doctor' OR EXISTS (" +
+                    "SELECT 1 FROM appointments a WHERE a.patient_id = p.id " +
+                    "AND a.staff_id = current_staff.id AND a.status <> 'Cancelled'))) ") +
+                "LIMIT 1";
             cmd.Parameters.AddWithValue("@patientId", patientId);
+            if (staffUsername != null)
+                cmd.Parameters.AddWithValue("@username", staffUsername);
 
             using var reader = cmd.ExecuteReader();
             if (!reader.Read()) return null;
@@ -154,6 +175,48 @@ namespace ClinicaCentral
                 "    GROUP BY patient_id " +
                 ") lv ON lv.patient_id = p.id " +
                 "ORDER BY p.id";
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                PatientRow patient = new PatientRow();
+                patient.Id = Convert.ToInt32(reader.GetValue(0));
+                patient.Name = Convert.ToString(reader.GetValue(1)) ?? "";
+                patient.DateOfBirthValue = reader.IsDBNull(2) ? null : Convert.ToDateTime(reader.GetValue(2));
+                patient.Contact = reader.IsDBNull(3) ? "-" : Convert.ToString(reader.GetValue(3)) ?? "-";
+                patient.LastVisitValue = reader.IsDBNull(4) ? null : Convert.ToDateTime(reader.GetValue(4));
+                list.Add(patient);
+            }
+            return list;
+        }
+
+        public List<PatientRow> GetForDoctor(string username)
+        {
+            var list = new List<PatientRow>();
+
+            using var conn = OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText =
+                "SELECT p.id, CONCAT(p.first_name, ' ', p.last_name), p.birthdate, p.contact, " +
+                "       lv.last_visit " +
+                "FROM patients p " +
+                "LEFT JOIN ( " +
+                "    SELECT patient_id, MAX(appointment_date) AS last_visit " +
+                "    FROM appointments " +
+                "    WHERE status = 'Completed' " +
+                "    GROUP BY patient_id " +
+                ") lv ON lv.patient_id = p.id " +
+                "JOIN users login_user ON login_user.username = @username " +
+                "JOIN staff current_staff ON current_staff.user_id = login_user.id " +
+                "WHERE current_staff.position <> 'Doctor' " +
+                "   OR EXISTS ( " +
+                "       SELECT 1 FROM appointments doctor_appointment " +
+                "       WHERE doctor_appointment.patient_id = p.id " +
+                "       AND doctor_appointment.staff_id = current_staff.id " +
+                "       AND doctor_appointment.status <> 'Cancelled' " +
+                "   ) " +
+                "ORDER BY p.id";
+            cmd.Parameters.AddWithValue("@username", username);
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
