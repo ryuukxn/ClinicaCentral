@@ -33,8 +33,9 @@
         </Style>
 
         <Style x:Key="ColHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#444"/>
+            <Setter Property="Foreground" Value="#000000"/>
         </Style>
 
         <Style x:Key="Cell" TargetType="TextBlock">
