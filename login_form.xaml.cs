@@ -26,11 +26,58 @@ namespace ClinicaCentral
             };
         }
 
+        private bool _syncingPassword;
+
         private void TxtPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (!_syncingPassword)
+            {
+                _syncingPassword = true;
+                txtPasswordVisible.Text = txtPassword.Password;
+                _syncingPassword = false;
+            }
+
+            UpdatePasswordHint();
+        }
+
+        private void TxtPasswordVisible_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!_syncingPassword)
+            {
+                _syncingPassword = true;
+                txtPassword.Password = txtPasswordVisible.Text;
+                _syncingPassword = false;
+            }
+
+            UpdatePasswordHint();
+        }
+
+        private void UpdatePasswordHint()
         {
             lblPasswordHint.Visibility = txtPassword.Password.Length == 0
                 ? Visibility.Visible
                 : Visibility.Collapsed;
+        }
+
+        private void BtnShowPassword_Changed(object sender, RoutedEventArgs e)
+        {
+            bool show = btnShowPassword.IsChecked == true;
+
+            if (show)
+            {
+                txtPasswordVisible.Text = txtPassword.Password;
+                txtPassword.Visibility = Visibility.Collapsed;
+                txtPasswordVisible.Visibility = Visibility.Visible;
+                txtPasswordVisible.Focus();
+                txtPasswordVisible.CaretIndex = txtPasswordVisible.Text.Length;
+            }
+            else
+            {
+                txtPassword.Password = txtPasswordVisible.Text;
+                txtPasswordVisible.Visibility = Visibility.Collapsed;
+                txtPassword.Visibility = Visibility.Visible;
+                txtPassword.Focus();
+            }
         }
 
         private void BtnLogin_Click(object sender, RoutedEventArgs e)

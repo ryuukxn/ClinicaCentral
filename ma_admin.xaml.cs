@@ -419,8 +419,13 @@ namespace ClinicaCentral
         {
             double availableHeight = Math.Max(260, ActualHeight - 320);
             string role = (RoleBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
-            double desiredHeight = role == "Patient" ? 500 : role == "Staff" ? 390 : 230;
+            bool formVisible = AccountFormFields.Visibility == Visibility.Visible;
 
+            double desiredHeight = role == "Patient" ? 500
+                                 : role == "Staff" ? 390
+                                 : formVisible ? 360   
+                                 : 230;                      
+                                 
             AddAccountPanel.MaxHeight = availableHeight;
             AddAccountPanel.Height = Math.Min(availableHeight, desiredHeight);
         }

@@ -224,9 +224,10 @@ namespace ClinicaCentral
                 duration,
                 @"(?<amount>\d+)\s*(?<unit>days?|d|weeks?|w|months?|mos?|years?|yrs?)\b",
                 RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            // No number + unit we can read (e.g. "ongoing", "until finished", "a week"):
+            // we can't tell when it ends, so keep showing it instead of hiding it.
             if (matches.Count == 0)
-                return string.Equals(duration.Trim(), "ongoing", StringComparison.OrdinalIgnoreCase) ||
-                       string.Equals(duration.Trim(), "continuous", StringComparison.OrdinalIgnoreCase);
+                return true;
 
             Match match = matches[matches.Count - 1];
             if (!int.TryParse(match.Groups["amount"].Value, NumberStyles.None,

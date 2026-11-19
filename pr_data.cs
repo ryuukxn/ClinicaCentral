@@ -64,7 +64,7 @@ namespace ClinicaCentral
         }
     }
 
-    public class PatientDirectory
+    public class PatientDirectory //list na pinag samang dictionary
     {
         private readonly List<PatientRow> _all = new List<PatientRow>();
         private readonly Dictionary<int, PatientRow> _byId = new Dictionary<int, PatientRow>();

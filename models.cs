@@ -5,7 +5,7 @@ using System.Windows.Threading;
 
 namespace ClinicaCentral
 {
-    public abstract class Person
+    public abstract class Person //encapsulation, abstraction
     {
         private string _name = "";
 
@@ -35,7 +35,7 @@ namespace ClinicaCentral
         }
     }
 
-    public abstract class User
+    public abstract class User //encapsulation, abstraction
     {
         public string Username { get; private set; }
 
@@ -50,7 +50,7 @@ namespace ClinicaCentral
         }
 
         public abstract string Role { get; }
-
+//polymorphism
         public abstract bool CanManageStaff();
 
         public virtual string GetWelcomeMessage()
@@ -58,7 +58,7 @@ namespace ClinicaCentral
             return "Welcome back, " + Username + "!";
         }
     }
-
+//inheritance
     public class AdminUser : User
     {
         public AdminUser(string username) : base(username) { }
@@ -95,7 +95,7 @@ namespace ClinicaCentral
 
         public override bool CanManageStaff() => false;
     }
-
+//inheritance
     public sealed class UserAccountRow
     {
         public int Id { get; init; }

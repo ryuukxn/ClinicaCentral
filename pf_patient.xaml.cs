@@ -140,6 +140,26 @@ namespace ClinicaCentral
 
         private void ChangePassword_Click(object sender, RoutedEventArgs e)
         {
+            var dlg = new ChangePasswordDialog { Owner = this };
+            if (dlg.ShowDialog() != true) return;
+
+            try
+            {
+                if (!ProfileEdit.ChangePassword(_user.Username, dlg.CurrentPassword, dlg.NewPassword))
+                {
+                    MessageBox.Show("Your current password is incorrect.", "Change Password",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                MessageBox.Show("Your password was changed.", "Change Password",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Your password could not be changed.\n\n" + ex.Message, "Change Password",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void EditProfile_Click(object sender, RoutedEventArgs e)

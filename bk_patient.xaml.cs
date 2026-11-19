@@ -35,7 +35,6 @@ namespace ClinicaCentral
                 ShowFirstName(db);
                 LoadDoctors();
                 RefreshSlots();
-                ShowExistingUpload();
             };
         }
 

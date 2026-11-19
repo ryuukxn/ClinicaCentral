@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 // commentttt
 
@@ -13,6 +15,11 @@ namespace ClinicaCentral
         private readonly DashboardRepository _dashboard;
         private readonly AppointmentDetailsRepository _appointmentDetails;
         private readonly string _displayName;
+
+        // Appointments already called with "Call Next" this session, so the
+        // auto-refresh does not put them back in the queue.
+        private readonly HashSet<int> _called = new HashSet<int>();
+        private readonly DispatcherTimer _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
 
         public dashboard_staff() : this("Doctor") { }
 
@@ -28,9 +35,15 @@ namespace ClinicaCentral
             _displayName = displayName;
             WelcomeText.Text = $"Welcome back, {displayName}!";
             Loaded += (s, e) => LoadDashboard();
+
+            // Queue refreshes by itself: new confirmations show up and patients
+            // whose visit was completed drop out without reopening the dashboard.
+            _refreshTimer.Tick += (s, e) => LoadDashboard(true);
+            Loaded += (s, e) => _refreshTimer.Start();
+            Closed += (s, e) => _refreshTimer.Stop();
         }
 
-        private void LoadDashboard()
+        private void LoadDashboard(bool quiet = false)
         {
             try
             {
@@ -42,7 +55,10 @@ namespace ClinicaCentral
 
                 _waitingQueue.Clear();
                 foreach (var entry in _dashboard.GetWaitingPatients(_displayName))
+                {
+                    if (_called.Contains(entry.AppointmentId)) continue;
                     _waitingQueue.Add(entry);
+                }
                 RefreshQueue();
 
                 var recent = _dashboard.GetRecentPatients(5, _displayName);
@@ -54,6 +70,7 @@ namespace ClinicaCentral
             }
             catch (Exception ex)
             {
+                if (quiet) return; // don't pop up a message every 10 seconds
                 MessageBox.Show(
                     "The dashboard could not load its data. Make sure MySQL is running in Laragon.\n\n" + ex.Message,
                     "Connection problem", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -117,6 +134,7 @@ namespace ClinicaCentral
             }
 
             QueueEntry next = _waitingQueue.CallNext();
+            _called.Add(next.AppointmentId);
             RefreshQueue();
             MessageBox.Show($"Now serving {next.Name} ({next.PatientCode}).", "Next patient",
                 MessageBoxButton.OK, MessageBoxImage.Information);

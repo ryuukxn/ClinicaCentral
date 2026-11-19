@@ -15,6 +15,7 @@ namespace ClinicaCentral
     public class QueueEntry
     {
         public int No { get; set; }
+        public int AppointmentId { get; set; }
         public int PatientId { get; set; }
         public string PatientCode => PatientRow.FormatId(PatientId);
         public string Name { get; set; } = "";
@@ -112,7 +113,7 @@ namespace ClinicaCentral
 
             using var conn = OpenConnection();
             using var cmd = new MySqlCommand(
-                "SELECT p.id, CONCAT(p.first_name, ' ', p.last_name) " +
+                "SELECT p.id, CONCAT(p.first_name, ' ', p.last_name), a.id " +
                 "FROM appointments a JOIN patients p ON p.id = a.patient_id " +
                 "JOIN users login_user ON login_user.username = @username " +
                 "JOIN staff current_doctor ON current_doctor.user_id = login_user.id AND current_doctor.position = 'Doctor' " +
@@ -127,7 +128,8 @@ namespace ClinicaCentral
                 list.Add(new QueueEntry
                 {
                     PatientId = Convert.ToInt32(reader.GetValue(0)),
-                    Name = Convert.ToString(reader.GetValue(1)) ?? ""
+                    Name = Convert.ToString(reader.GetValue(1)) ?? "",
+                    AppointmentId = Convert.ToInt32(reader.GetValue(2))
                 });
             }
             return list;

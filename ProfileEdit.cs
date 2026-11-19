@@ -70,5 +70,29 @@ namespace ClinicaCentral
                 throw;
             }
         }
+
+        public static bool ChangePassword(string username, string currentPassword, string newPassword)
+        {
+            using var conn = Database.GetConnection();
+            conn.Open();
+
+            string? hash;
+            using (var cmd = new MySqlCommand("SELECT password_hash FROM users WHERE username = @u LIMIT 1", conn))
+            {
+                cmd.Parameters.AddWithValue("@u", username);
+                hash = cmd.ExecuteScalar() as string;
+            }
+
+            if (hash == null || !BCrypt.Net.BCrypt.Verify(currentPassword, hash))
+                return false;
+
+            using (var cmd = new MySqlCommand("UPDATE users SET password_hash = @h WHERE username = @u", conn))
+            {
+                cmd.Parameters.AddWithValue("@h", BCrypt.Net.BCrypt.HashPassword(newPassword));
+                cmd.Parameters.AddWithValue("@u", username);
+                cmd.ExecuteNonQuery();
+            }
+            return true;
+        }
     }
 }

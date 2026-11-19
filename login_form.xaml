@@ -30,6 +30,36 @@
             <Setter Property="IsHitTestVisible" Value="False"/>
         </Style>
 
+        <Style x:Key="EyeToggle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#777"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="ToolTip" Value="Show password"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border Background="Transparent" Padding="14,0">
+                            <TextBlock x:Name="icon" Text="&#xE7B3;" FontFamily="Segoe MDL2 Assets" FontSize="20"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="icon" Property="Foreground" Value="#1E40D8"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="icon" Property="Text" Value="&#xED1A;"/>
+                                <Setter TargetName="icon" Property="Foreground" Value="#1E40D8"/>
+                                <Setter Property="ToolTip" Value="Hide password"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="PrimaryButton" TargetType="Button">
             <Setter Property="Background" Value="#5B84C4"/>
             <Setter Property="Foreground" Value="White"/>
@@ -117,14 +147,24 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="&#xE72E;" Style="{StaticResource InputIcon}"/>
                         <PasswordBox x:Name="txtPassword" Grid.Column="1"
                                      Background="Transparent" BorderThickness="0"
                                      FontSize="17" VerticalContentAlignment="Center"
                                      PasswordChanged="TxtPassword_PasswordChanged"/>
+                        <TextBox x:Name="txtPasswordVisible" Grid.Column="1"
+                                 Background="Transparent" BorderThickness="0"
+                                 FontSize="17" VerticalContentAlignment="Center"
+                                 Visibility="Collapsed"
+                                 TextChanged="TxtPasswordVisible_TextChanged"/>
                         <TextBlock x:Name="lblPasswordHint" Grid.Column="1"
                                    Text="Password" Style="{StaticResource Hint}"/>
+                        <ToggleButton x:Name="btnShowPassword" Grid.Column="2"
+                                      Style="{StaticResource EyeToggle}"
+                                      Checked="BtnShowPassword_Changed"
+                                      Unchecked="BtnShowPassword_Changed"/>
                     </Grid>
                 </Border>
 
