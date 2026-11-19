@@ -135,7 +135,7 @@ namespace ClinicaCentral
                 return;
             }
 
-            if (page == "Medical Records" && _user is AdminUser admin)
+            if (page == "Medical Reports" && _user is AdminUser admin)
             {
                 new mr_staff(admin).Open();
                 Close();

@@ -161,7 +161,7 @@ namespace ClinicaCentral
         {
             if (!(_user is AdminUser admin))
             {
-                MessageBox.Show("Only admins can open medical records.", "Access denied",
+                MessageBox.Show("Only admins can open medical reports.", "Access denied",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }

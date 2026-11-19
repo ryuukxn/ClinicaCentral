@@ -234,7 +234,7 @@ namespace ClinicaCentral
         {
             UploadPreview.Source = PhotoStore.FromBytes(data);
             UploadPlaceholder.Visibility = Visibility.Collapsed;
-            UploadStatus.Text = "Uploaded: " + fileName + ". Your doctor can see it in your medical record.";
+            UploadStatus.Text = "Uploaded: " + fileName + ". Your doctor can see it in your medical report.";
         }
 
         private void ShowExistingUpload()

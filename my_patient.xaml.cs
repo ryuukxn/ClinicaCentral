@@ -117,7 +117,7 @@ namespace ClinicaCentral
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "The medical record for this appointment could not be loaded.\n\n" + ex.Message,
+                    "The medical report for this appointment could not be loaded.\n\n" + ex.Message,
                     "Connection problem", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
@@ -125,8 +125,8 @@ namespace ClinicaCentral
             if (record == null)
             {
                 MessageBox.Show(
-                    "No medical record was found for this completed appointment.",
-                    "Medical record unavailable", MessageBoxButton.OK, MessageBoxImage.Information);
+                    "No medical report was found for this completed appointment.",
+                    "Medical report unavailable", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 

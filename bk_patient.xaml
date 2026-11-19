@@ -311,7 +311,7 @@
                                         Style="{StaticResource OutlineButton}" Click="UploadImage_Click"/>
                                 <TextBlock x:Name="UploadStatus" FontSize="13" Foreground="#777" Margin="2,6,0,0"
                                            TextWrapping="Wrap"
-                                           Text="JPG, PNG or BMP. Your doctor will see it in your medical record."/>
+                                           Text="JPG, PNG or BMP. Your doctor will see it in your medical report."/>
                             </StackPanel>
                         </StackPanel>
 

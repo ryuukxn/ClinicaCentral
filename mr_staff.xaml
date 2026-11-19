@@ -1,7 +1,7 @@
 <Window x:Class="ClinicaCentral.mr_staff"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="ClinicaCentral - Medical Records"
+        Title="ClinicaCentral - Medical Reports"
         Height="760" Width="1200" MinHeight="640" MinWidth="1000"
         WindowStartupLocation="CenterScreen" Background="#E8E8E8"
         FontFamily="Segoe UI">
@@ -152,10 +152,10 @@
                             <TextBlock Text="Patient Records"/>
                         </StackPanel>
                     </Button>
-                    <Button Style="{StaticResource NavButton}" Background="#00AEEF" Foreground="White" Tag="Medical Records" Click="Nav_Click">
+                    <Button Style="{StaticResource NavButton}" Background="#00AEEF" Foreground="White" Tag="Medical Reports" Click="Nav_Click">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8A5;" Width="28"/>
-                            <TextBlock Text="Medical Records" FontWeight="SemiBold"/>
+                            <TextBlock Text="Medical Reports" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource NavButton}" Tag="Schedule" Click="Nav_Click">
@@ -186,10 +186,10 @@
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource NavButton}" Background="#00AEEF" Foreground="White"
-                            Tag="Medical Records" Click="AdminNav_Click">
+                            Tag="Medical Reports" Click="AdminNav_Click">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8A5;" Width="28"/>
-                            <TextBlock Text="Medical Records" FontWeight="SemiBold"/>
+                            <TextBlock Text="Medical Reports" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource NavButton}" Tag="Patient Records" Click="AdminNav_Click">
@@ -237,24 +237,40 @@
 
             <Border Grid.Row="1" Style="{StaticResource Card}" Margin="28,22,28,22">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="Medical Records" FontFamily="{StaticResource TitleFont}"
+                    <TextBlock DockPanel.Dock="Top" Text="Medical Reports" FontFamily="{StaticResource TitleFont}"
                                FontSize="28" FontWeight="Bold" Margin="0,0,0,14"/>
 
                     <TextBlock x:Name="EmptyText" DockPanel.Dock="Bottom" Visibility="Collapsed"
-                               Text="No medical records yet." Foreground="#777" Margin="0,10,0,0"/>
+                               Text="No medical reports yet." Foreground="#777" Margin="0,10,0,0"/>
+
+                    <Grid DockPanel.Dock="Top" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="SearchBox" Height="36" Width="360" HorizontalAlignment="Left"
+                                 Padding="10,6" FontSize="14" BorderBrush="#BDBDBD" BorderThickness="1"
+                                 ToolTip="Search by Patient ID or name"
+                                 TextChanged="SearchBox_TextChanged"/>
+                        <Button Grid.Column="1" Content="Clear" Height="36" Padding="16,4"
+                                Margin="10,0,0,0" Style="{StaticResource BlueButton}"
+                                Click="ClearSearch_Click"/>
+                    </Grid>
 
                     <Border DockPanel.Dock="Top" Background="#EDEDED" BorderBrush="#CFCFCF" BorderThickness="1" Padding="14,10">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="130"/>
+                                <ColumnDefinition Width="130"/>
                                 <ColumnDefinition Width="1.2*"/>
                                 <ColumnDefinition Width="1.5*"/>
                                 <ColumnDefinition Width="150"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="Date" Style="{StaticResource ColHeader}"/>
-                            <TextBlock Grid.Column="1" Text="Patient Name" Style="{StaticResource ColHeader}"/>
-                            <TextBlock Grid.Column="2" Text="Diagnosis" Style="{StaticResource ColHeader}"/>
-                            <TextBlock Grid.Column="3" Text="Action" Style="{StaticResource ColHeader}" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="Patient ID" Style="{StaticResource ColHeader}"/>
+                            <TextBlock Grid.Column="2" Text="Patient Name" Style="{StaticResource ColHeader}"/>
+                            <TextBlock Grid.Column="3" Text="Diagnosis" Style="{StaticResource ColHeader}"/>
+                            <TextBlock Grid.Column="4" Text="Action" Style="{StaticResource ColHeader}" HorizontalAlignment="Center"/>
                         </Grid>
                     </Border>
 
@@ -265,15 +281,17 @@
                                     <Border BorderBrush="#CFCFCF" BorderThickness="1,0,1,1" Padding="14,14">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="150"/>
+                                                <ColumnDefinition Width="130"/>
+                                                <ColumnDefinition Width="130"/>
                                                 <ColumnDefinition Width="1.2*"/>
                                                 <ColumnDefinition Width="1.5*"/>
                                                 <ColumnDefinition Width="150"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="{Binding DateText}" Style="{StaticResource Cell}"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding PatientName}" Style="{StaticResource Cell}"/>
-                                            <TextBlock Grid.Column="2" Text="{Binding Diagnosis}" Style="{StaticResource Cell}"/>
-                                            <StackPanel Grid.Column="3" Orientation="Horizontal"
+                                            <TextBlock Grid.Column="1" Text="{Binding PatientCode}" Style="{StaticResource Cell}"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding PatientName}" Style="{StaticResource Cell}"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding Diagnosis}" Style="{StaticResource Cell}"/>
+                                            <StackPanel Grid.Column="4" Orientation="Horizontal"
                                                         HorizontalAlignment="Center">
                                                 <Button Content="View" Tag="{Binding Id}"
                                                         Style="{StaticResource LinkButton}" Margin="0,0,12,0"

@@ -172,10 +172,10 @@
                             <TextBlock Text="Patient Records"/>
                         </StackPanel>
                     </Button>
-                    <Button Style="{StaticResource NavButton}" Tag="Medical Records" Click="Nav_Click">
+                    <Button Style="{StaticResource NavButton}" Tag="Medical Reports" Click="Nav_Click">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8A5;" Width="28"/>
-                            <TextBlock Text="Medical Records"/>
+                            <TextBlock Text="Medical Reports"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource NavButton}" Background="#00AEEF" Foreground="White" Tag="Schedule" Click="Nav_Click">
@@ -431,7 +431,7 @@
                                          Content="Not Healthy / Needs Prescription" FontSize="14"/>
                         </StackPanel>
 
-                        <TextBlock Text="Medical Record" Style="{StaticResource CardTitle}" FontSize="17"/>
+                        <TextBlock Text="Medical Report" Style="{StaticResource CardTitle}" FontSize="17"/>
                         <TextBlock Text="Diagnosis (required)" FontSize="13" FontWeight="SemiBold" Margin="0,8,0,4"/>
                         <Border BorderBrush="#D5D9E0" BorderThickness="1" CornerRadius="5" Padding="8,2">
                             <TextBox x:Name="DiagnosisInput" Text="Normal / Healthy" MaxLength="150"

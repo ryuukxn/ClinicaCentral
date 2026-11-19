@@ -19,6 +19,7 @@ namespace ClinicaCentral
         {
             InitializeComponent();
 
+            ReceiptCard.Width = PdfExport.ReceiptWidthPixels;
             _user = user ?? throw new ArgumentNullException(nameof(user));
             _receipts = new ReceiptRepository(new DatabaseConnection());
             _receipt = _receipts.GetById(receiptId, _user)
@@ -41,7 +42,7 @@ namespace ClinicaCentral
 
             try
             {
-                PdfExport.SaveElement(ReceiptCard, dialog.FileName);
+                PdfExport.SaveReceiptElement(ReceiptCard, dialog.FileName);
             }
             catch (Exception ex)
             {

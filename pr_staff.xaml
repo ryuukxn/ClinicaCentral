@@ -110,10 +110,10 @@
                             <TextBlock Text="Patient Records" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Button>
-                    <Button Style="{StaticResource NavButton}" Tag="Medical Records" Click="Nav_Click">
+                    <Button Style="{StaticResource NavButton}" Tag="Medical Reports" Click="Nav_Click">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8A5;" Width="28"/>
-                            <TextBlock Text="Medical Records"/>
+                            <TextBlock Text="Medical Reports"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource NavButton}" Tag="Schedule" Click="Nav_Click">
@@ -143,10 +143,10 @@
                             <TextBlock Text="Appointments"/>
                         </StackPanel>
                     </Button>
-                    <Button Style="{StaticResource NavButton}" Tag="Medical Records" Click="AdminNav_Click">
+                    <Button Style="{StaticResource NavButton}" Tag="Medical Reports" Click="AdminNav_Click">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8A5;" Width="28"/>
-                            <TextBlock Text="Medical Records"/>
+                            <TextBlock Text="Medical Reports"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource NavButton}" Background="#00AEEF" Foreground="White"

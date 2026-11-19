@@ -33,26 +33,39 @@ namespace ClinicaCentral
             Loaded += (s, e) => LoadRecords();
         }
 
-        private void LoadRecords()
+        private void LoadRecords(string? searchText = null)
         {
             try
             {
                 _all.Clear();
                 _all.AddRange(_adminUser == null
-                    ? _records.GetForDoctor(_displayName)
-                    : _records.GetAll());
+                    ? _records.GetForDoctor(_displayName, searchText)
+                    : _records.GetAll(searchText));
                 foreach (MedicalRecordRow record in _all)
                     record.CanDelete = _adminUser != null;
 
                 RecordList.ItemsSource = _all;
+                EmptyText.Text = string.IsNullOrWhiteSpace(searchText)
+                    ? "No medical reports yet."
+                    : "No results found.";
                 EmptyText.Visibility = _all.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "The medical records could not be loaded. Make sure MySQL is running in Laragon and that medical_records.sql and medical_records_details.sql were both run.\n\n" + ex.Message,
+                    "The medical reports could not be loaded. Make sure MySQL is running in Laragon and that medical_records.sql and medical_records_details.sql were both run.\n\n" + ex.Message,
                     "Connection problem", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            LoadRecords(SearchBox.Text);
+        }
+
+        private void ClearSearch_Click(object sender, RoutedEventArgs e)
+        {
+            SearchBox.Clear();
         }
 
         private void View_Click(object sender, RoutedEventArgs e)
@@ -71,21 +84,21 @@ namespace ClinicaCentral
         {
             if (_adminUser == null)
             {
-                MessageBox.Show("Only admins can delete medical records.", "Access denied",
+                MessageBox.Show("Only admins can delete medical reports.", "Access denied",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             if (!(sender is Button button) || !(button.Tag is int recordId))
             {
-                MessageBox.Show("The medical record could not be identified.", "Medical Records",
+                MessageBox.Show("The medical report could not be identified.", "Medical Reports",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             MessageBoxResult answer = MessageBox.Show(
-                "Delete this medical record? It will be moved to Deleted Medical Records and can be restored later.",
-                "Delete medical record", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                "Delete this medical report? It will be moved to Deleted Medical Reports and can be restored later.",
+                "Delete medical report", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (answer != MessageBoxResult.Yes) return;
 
             try
@@ -95,8 +108,8 @@ namespace ClinicaCentral
             }
             catch (Exception ex)
             {
-                MessageBox.Show("The medical record could not be deleted.\n\n" + ex.Message,
-                    "Medical Records", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("The medical report could not be deleted.\n\n" + ex.Message,
+                    "Medical Reports", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -127,7 +140,7 @@ namespace ClinicaCentral
         {
             string page = (sender as Button)?.Tag as string ?? "";
 
-            if (page == "Medical Records") return;
+            if (page == "Medical Reports") return;
 
             if (page == "Dashboard")
             {

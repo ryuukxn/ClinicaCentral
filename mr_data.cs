@@ -163,19 +163,30 @@ namespace ClinicaCentral
     {
         public MedicalRecordRepository(DatabaseConnection db) : base(db) { }
 
-        public List<MedicalRecordRow> GetAll()
+        public List<MedicalRecordRow> GetAll(string? searchText = null)
         {
-            return Query("", null, null);
+            return Query("", null, null, searchText);
         }
 
-        public List<MedicalRecordRow> GetForDoctor(string doctorName)
+        public List<MedicalRecordRow> GetForDoctor(string doctorUsername, string? searchText = null)
         {
-            return Query("AND m.doctor = @doctor ", null, doctorName);
+            if (string.IsNullOrWhiteSpace(doctorUsername))
+                throw new ArgumentException("A staff username is required.", nameof(doctorUsername));
+
+            return Query(
+                "AND EXISTS (" +
+                "SELECT 1 FROM users login_user " +
+                "JOIN staff current_staff ON current_staff.user_id = login_user.id " +
+                "WHERE login_user.username = @doctorUsername AND login_user.role = 'Staff' " +
+                "AND (m.doctor = login_user.username OR EXISTS (SELECT 1 FROM appointments own_appointment " +
+                "WHERE own_appointment.id = m.appointment_id " +
+                "AND own_appointment.staff_id = current_staff.id))) ",
+                null, doctorUsername, searchText);
         }
 
         public List<MedicalRecordRow> GetForPatient(int patientId)
         {
-            return Query("AND m.patient_id = @pid ", patientId, null);
+            return Query("AND m.patient_id = @pid ", patientId, null, null);
         }
 
         public void SoftDelete(int recordId, string deletedBy)
@@ -189,12 +200,19 @@ namespace ClinicaCentral
             cmd.Parameters.AddWithValue("@id", recordId);
 
             if (cmd.ExecuteNonQuery() != 1)
-                throw new InvalidOperationException("The medical record was already deleted or no longer exists.");
+                throw new InvalidOperationException("The medical report was already deleted or no longer exists.");
         }
 
-        private List<MedicalRecordRow> Query(string where, int? patientId, string? doctorName)
+        private List<MedicalRecordRow> Query(
+            string where, int? patientId, string? doctorUsername, string? searchText)
         {
             var list = new List<MedicalRecordRow>();
+            string search = searchText?.Trim() ?? "";
+            string searchClause = search.Length == 0
+                ? ""
+                : "AND (LOWER(CAST(m.patient_id AS CHAR)) LIKE LOWER(@search) ESCAPE '!' " +
+                  "OR LOWER(CONCAT('PCC-', LPAD(m.patient_id, 4, '0'))) LIKE LOWER(@search) ESCAPE '!' " +
+                  "OR LOWER(CONCAT(p.first_name, ' ', p.last_name)) LIKE LOWER(@search) ESCAPE '!') ";
 
             using var conn = OpenConnection();
             using var cmd = new MySqlCommand(
@@ -206,10 +224,18 @@ namespace ClinicaCentral
                 "LEFT JOIN staff staff_name ON staff_name.full_name = m.doctor " +
                 "LEFT JOIN users u ON u.username = m.doctor " +
                 "LEFT JOIN staff staff_user ON staff_user.user_id = u.id " +
-                "WHERE m.is_deleted = 0 " + where +
+                "WHERE m.is_deleted = 0 " + where + searchClause +
                 "ORDER BY m.record_date DESC, m.id DESC", conn);
             if (patientId.HasValue) cmd.Parameters.AddWithValue("@pid", patientId.Value);
-            if (doctorName != null) cmd.Parameters.AddWithValue("@doctor", doctorName);
+            if (doctorUsername != null) cmd.Parameters.AddWithValue("@doctorUsername", doctorUsername);
+            if (search.Length > 0)
+            {
+                string escapedSearch = search
+                    .Replace("!", "!!", StringComparison.Ordinal)
+                    .Replace("%", "!%", StringComparison.Ordinal)
+                    .Replace("_", "!_", StringComparison.Ordinal);
+                cmd.Parameters.AddWithValue("@search", "%" + escapedSearch + "%");
+            }
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())

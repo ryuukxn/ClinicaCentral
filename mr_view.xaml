@@ -1,7 +1,7 @@
 <Window x:Class="ClinicaCentral.mr_view"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Medical Record"
+        Title="Medical Report"
         Width="680" SizeToContent="Height" MaxHeight="820"
         ResizeMode="NoResize" WindowStartupLocation="CenterOwner"
         Background="White" FontFamily="Segoe UI">
@@ -95,7 +95,7 @@
             <StackPanel>
 
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Medical Records" FontFamily="{StaticResource TitleFont}"
+                    <TextBlock Text="Medical Report" FontFamily="{StaticResource TitleFont}"
                                FontSize="26" FontWeight="Bold"/>
                     <TextBlock Text="{Binding CodeText}" Foreground="#777" FontSize="13"
                                VerticalAlignment="Bottom" Margin="10,0,0,5"/>

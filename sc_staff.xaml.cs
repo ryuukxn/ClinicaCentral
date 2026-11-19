@@ -567,7 +567,7 @@ namespace ClinicaCentral
                 return;
             }
 
-            if (page == "Medical Records")
+            if (page == "Medical Reports")
             {
                 new mr_staff(_displayName).Open();
                 Close();

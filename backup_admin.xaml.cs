@@ -280,8 +280,8 @@ namespace ClinicaCentral
             }
             catch (Exception ex)
             {
-                MessageBox.Show("The medical record could not be restored.\n\n" + ex.Message,
-                    "Deleted Medical Records", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("The medical report could not be restored.\n\n" + ex.Message,
+                    "Deleted Medical Reports", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -414,7 +414,7 @@ namespace ClinicaCentral
         {
             if (!(_user is AdminUser admin))
             {
-                MessageBox.Show("Only admins can open medical records.", "Access denied",
+                MessageBox.Show("Only admins can open medical reports.", "Access denied",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }

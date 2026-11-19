@@ -114,7 +114,7 @@ namespace ClinicaCentral
             cmd.Parameters.AddWithValue("@id", recordId);
 
             if (cmd.ExecuteNonQuery() != 1)
-                throw new InvalidOperationException("The medical record was already restored or no longer exists.");
+                throw new InvalidOperationException("The medical report was already restored or no longer exists.");
         }
     }
 }

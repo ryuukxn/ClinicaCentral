@@ -80,7 +80,7 @@ namespace ClinicaCentral
 
             try
             {
-                dialog.PrintVisual(RecordCard, "Medical record " + _record.CodeText);
+                dialog.PrintVisual(RecordCard, "Medical report " + _record.CodeText);
             }
             finally
             {

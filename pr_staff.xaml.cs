@@ -192,7 +192,7 @@ namespace ClinicaCentral
                 return;
             }
 
-            if (page == "Medical Records")
+            if (page == "Medical Reports")
             {
                 new mr_staff(_displayName).Open();
                 Close();
@@ -219,7 +219,7 @@ namespace ClinicaCentral
                 new ma_admin(_adminUser).Open();
             else if (page == "Appointments")
                 new appointment_admin(_adminUser).Open();
-            else if (page == "Medical Records")
+            else if (page == "Medical Reports")
                 new mr_staff(_adminUser).Open();
             else if (page == "Receipts")
                 new receipt_admin(_adminUser).Open();
