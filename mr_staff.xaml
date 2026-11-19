@@ -247,12 +247,16 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBox x:Name="SearchBox" Height="36" Width="360" HorizontalAlignment="Left"
                                  Padding="10,6" FontSize="14" BorderBrush="#BDBDBD" BorderThickness="1"
                                  ToolTip="Search by Patient ID or name"
-                                 TextChanged="SearchBox_TextChanged"/>
-                        <Button Grid.Column="1" Content="Clear" Height="36" Padding="16,4"
+                                 KeyDown="SearchBox_KeyDown"/>
+                        <Button Grid.Column="1" Content="Search" Height="36" Padding="16,4"
+                                Margin="10,0,0,0" Style="{StaticResource BlueButton}"
+                                Click="Search_Click"/>
+                        <Button Grid.Column="2" Content="Clear" Height="36" Padding="16,4"
                                 Margin="10,0,0,0" Style="{StaticResource BlueButton}"
                                 Click="ClearSearch_Click"/>
                     </Grid>

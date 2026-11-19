@@ -9,7 +9,7 @@ namespace ClinicaCentral
         private readonly string _displayName;
         private readonly AdminUser? _adminUser;
         private readonly MedicalRecordRepository _records;
-        private readonly System.Collections.Generic.List<MedicalRecordRow> _all =
+        private System.Collections.Generic.List<MedicalRecordRow> _all =
             new System.Collections.Generic.List<MedicalRecordRow>();
 
         public mr_staff() : this("Doctor", null) { }
@@ -33,14 +33,15 @@ namespace ClinicaCentral
             Loaded += (s, e) => LoadRecords();
         }
 
-        private void LoadRecords(string? searchText = null)
+        private void LoadRecords()
         {
+            string searchText = SearchBox.Text.Trim();
+
             try
             {
-                _all.Clear();
-                _all.AddRange(_adminUser == null
+                _all = _adminUser == null
                     ? _records.GetForDoctor(_displayName, searchText)
-                    : _records.GetAll(searchText));
+                    : _records.GetAll(searchText);
                 foreach (MedicalRecordRow record in _all)
                     record.CanDelete = _adminUser != null;
 
@@ -52,20 +53,33 @@ namespace ClinicaCentral
             }
             catch (Exception ex)
             {
+                _all = new System.Collections.Generic.List<MedicalRecordRow>();
+                RecordList.ItemsSource = _all;
+                EmptyText.Text = "Medical reports could not be loaded.";
+                EmptyText.Visibility = Visibility.Visible;
                 MessageBox.Show(
                     "The medical reports could not be loaded. Make sure MySQL is running in Laragon and that medical_records.sql and medical_records_details.sql were both run.\n\n" + ex.Message,
                     "Connection problem", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
-        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            LoadRecords(SearchBox.Text);
+            if (e.Key != System.Windows.Input.Key.Enter) return;
+
+            e.Handled = true;
+            LoadRecords();
+        }
+
+        private void Search_Click(object sender, RoutedEventArgs e)
+        {
+            LoadRecords();
         }
 
         private void ClearSearch_Click(object sender, RoutedEventArgs e)
         {
             SearchBox.Clear();
+            LoadRecords();
         }
 
         private void View_Click(object sender, RoutedEventArgs e)

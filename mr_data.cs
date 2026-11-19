@@ -176,11 +176,8 @@ namespace ClinicaCentral
             return Query(
                 "AND EXISTS (" +
                 "SELECT 1 FROM users login_user " +
-                "JOIN staff current_staff ON current_staff.user_id = login_user.id " +
                 "WHERE login_user.username = @doctorUsername AND login_user.role = 'Staff' " +
-                "AND (m.doctor = login_user.username OR EXISTS (SELECT 1 FROM appointments own_appointment " +
-                "WHERE own_appointment.id = m.appointment_id " +
-                "AND own_appointment.staff_id = current_staff.id))) ",
+                "AND m.doctor = login_user.username) ",
                 null, doctorUsername, searchText);
         }
 
@@ -210,9 +207,9 @@ namespace ClinicaCentral
             string search = searchText?.Trim() ?? "";
             string searchClause = search.Length == 0
                 ? ""
-                : "AND (LOWER(CAST(m.patient_id AS CHAR)) LIKE LOWER(@search) ESCAPE '!' " +
-                  "OR LOWER(CONCAT('PCC-', LPAD(m.patient_id, 4, '0'))) LIKE LOWER(@search) ESCAPE '!' " +
-                  "OR LOWER(CONCAT(p.first_name, ' ', p.last_name)) LIKE LOWER(@search) ESCAPE '!') ";
+                : "AND (LOWER(CAST(m.patient_id AS CHAR)) LIKE LOWER(@term) ESCAPE '!' " +
+                  "OR LOWER(CONCAT('PCC-', LPAD(m.patient_id, 4, '0'))) LIKE LOWER(@term) ESCAPE '!' " +
+                  "OR LOWER(CONCAT(p.first_name, ' ', p.last_name)) LIKE LOWER(@term) ESCAPE '!') ";
 
             using var conn = OpenConnection();
             using var cmd = new MySqlCommand(
@@ -234,7 +231,7 @@ namespace ClinicaCentral
                     .Replace("!", "!!", StringComparison.Ordinal)
                     .Replace("%", "!%", StringComparison.Ordinal)
                     .Replace("_", "!_", StringComparison.Ordinal);
-                cmd.Parameters.AddWithValue("@search", "%" + escapedSearch + "%");
+                cmd.Parameters.AddWithValue("@term", "%" + escapedSearch + "%");
             }
 
             using var reader = cmd.ExecuteReader();
